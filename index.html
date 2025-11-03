@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Secretaria Acadêmica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* Variáveis de cor PRINCIPAIS (MANTIDAS COMO LIGHT MODE PADRÃO) */
+        :root {
+            --primary-color: #007bff; /* Azul primário mais vibrante (Boost) */
+            --primary-light: #e6f7ff; /* Fundo de hover mais claro */
+            --primary-darker: #0056b3; /* Cor mais escura para texto/ícone no hover/ativo */
+            --text-color: #212529; /* Texto principal (quase preto) */
+            --secondary-text-color: #6c757d; /* Texto secundário (cinza suave) */
+            --icon-color: #adb5bd; /* Cor padrão do ícone */
+            --sidebar-bg: #ffffff;
+            --body-bg: #f8f9fa; /* Fundo do corpo muito claro */
+            --border-color-light: #e9ecef; /* Linha divisória mais sutil */
+            --demanda-highlight-color: #495057; /* Cor de destaque da seção */
+
+            --transition-speed: 0.3s;
+            --logout-hover-bg: #ffebee;
+            --logout-hover-color: #dc3545; /* Vermelho de alerta */
+
+            /* Variáveis para o Modal */
+            --modal-bg-color: #ffffff;
+            --modal-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            --input-border: #ced4da;
+            --button-success: #28a745;
+            --button-hover: #218838;
+        }
+
+        /* ------------------------------------------- */
+        /* ESTILOS BASE (LIGHT MODE) */
+        /* ------------------------------------------- */
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--body-bg);
+            display: flex;
+            justify-content: flex-start;
+            min-height: 100vh;
+            overflow: hidden;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        /* CLASSE MODIFICADA PARA DESFOQUE MAIS INTENSO */
+        .content-blurred {
+            /* Aumentado o blur para 15px, grayscale para 80% e adicionada opacidade baixa */
+            filter: blur(15px) grayscale(80%) opacity(0.3);
+            pointer-events: none; /* Desabilita interações no fundo */
+            user-select: none;
+            transition: filter var(--transition-speed) ease, opacity var(--transition-speed) ease; /* Transição para o blur e opacidade */
+        }
+
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            color: var(--text-color);
+            padding: 0;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1); /* Sombra mais suave */
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow-y: auto;
+            z-index: 100;
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        .content {
+            margin-left: 280px;
+            padding: 0;
+            flex-grow: 1;
+            box-sizing: border-box;
+            width: calc(100% - 280px);
+            height: 100vh;
+            transition: filter var(--transition-speed) ease, opacity var(--transition-speed) ease; /* Transição para o blur e opacidade */
+        }
+
+        #main-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 25px 20px 20px 20px;
+            border-bottom: 1px solid var(--border-color-light);
+            transition: border-color var(--transition-speed) ease;
+        }
+
+        .logo-img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            text-align: center;
+        }
+
+        .user-info h3 {
+            margin: 0;
+            line-height: 1.4;
+            transition: color var(--transition-speed) ease;
+        }
+
+        .user-info h3:first-of-type {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .user-info h3:last-of-type {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--secondary-text-color);
+        }
+
+        .menu-list {
+            list-style: none;
+            padding: 10px 0;
+            margin: 0;
+        }
+
+        .main-menu-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 10px;
+        }
+
+        /* AJUSTES PARA DESTACAR E CENTRALIZAR */
+        .menu-section-title {
+            font-size: 16px; /* Aumentar o tamanho da fonte */
+            font-weight: 700;
+            color: var(--demanda-highlight-color);
+            text-transform: uppercase;
+            padding: 20px 20px 5px 20px;
+            margin: 0;
+            border-top: 1px solid var(--border-color-light);
+            letter-spacing: 1.5px;
+            text-align: center; /* CENTRALIZADO */
+            transition: color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+        }
+        
+        .menu-section-title::after {
+            content: '';
+            display: block;
+            width: 50px; /* Largura do sublinhado */
+            height: 2px;
+            background: var(--primary-color);
+            margin: 8px auto 0 auto; /* Centraliza o sublinhado */
+            border-radius: 2px;
+            transition: background var(--transition-speed) ease;
+        }
+        /* FIM DOS AJUSTES */
+
+
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 15px;
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            margin: 2px 10px 2px 10px;
+            border-radius: 8px;
+        }
+
+        .menu-item a:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-darker);
+            border-radius: 8px;
+        }
+
+        .menu-item a.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 600;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.1);
+        }
+
+        .menu-item a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--primary-color);
+            border-radius: 8px 0 0 8px;
+            transition: background var(--transition-speed) ease;
+        }
+
+        .menu-item a i {
+            width: 25px;
+            text-align: center;
+            margin-right: 15px;
+            font-size: 18px;
+            color: var(--icon-color);
+            transition: color var(--transition-speed) ease;
+        }
+
+        .menu-item a:hover i, .menu-item a.active i {
+            color: var(--primary-color);
+        }
+
+        .logout-section {
+            border-top: 1px solid var(--border-color-light);
+            padding: 10px 0 5px 0;
+            transition: border-color var(--transition-speed) ease;
+        }
+
+        .logout-section .menu-item a {
+            color: var(--secondary-text-color);
+            font-weight: 500;
+            margin: 2px 10px 2px 10px;
+        }
+        .logout-section .menu-item a:hover {
+            color: var(--logout-hover-color);
+            background-color: var(--logout-hover-bg);
+        }
+        .logout-section .menu-item a i {
+            color: var(--icon-color);
+        }
+        .logout-section .menu-item a:hover i {
+            color: var(--logout-hover-color);
+        }
+
+
+        /* ------------------------------------------- */
+        /* ESTILOS DO MODAL DE LOGIN */
+        /* ------------------------------------------- */
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4); /* Fundo escuro sutil */
+            display: none; /* Escondido por padrão */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Acima de tudo */
+        }
+
+        .modal-content {
+            background-color: var(--modal-bg-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--modal-shadow);
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color-light);
+        }
+
+        .modal-header h4 {
+            margin: 0;
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 15px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            flex-grow: 1;
+            margin: 0 5px;
+        }
+
+        #login-button {
+            background-color: var(--button-success);
+            color: white;
+        }
+
+        #login-button:hover {
+            background-color: var(--button-hover);
+        }
+
+        #cancel-button {
+            background-color: var(--secondary-text-color);
+            color: white;
+        }
+
+        #cancel-button:hover {
+            background-color: #5a6268;
+        }
+
+        #login-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: none;
+            text-align: center;
+        }
+
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+
+<div class="modal-overlay" id="login-modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4>Acesso Restrito - Supervisores</h4>
+        </div>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Usuário:</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" required>
+            </div>
+            <div id="login-message" class="message-error"></div>
+            <div class="modal-buttons">
+                <button type="button" id="cancel-button">Cancelar</button>
+                <button type="submit" id="login-button">Entrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="sidebar content-blurred" id="sidebar">
+
+    <div class="header">
+        <img src="https://drive.google.com/thumbnail?id=18WhdWeW61paD_dHxoo4SLwZLB3RAbSkl&sz=w1000" alt="Logo Codinglab" class="logo-img">
+        <div class="user-info">
+            <h3>Secretaria</h3>
+            <h3>Acadêmica Unicesumar</h3>
+        </div>
+    </div>
+
+    <div class="main-menu-container">
+        <ul class="menu-list" id="menu-items">
+            <li class="menu-item"><a href="#" class="active" data-page="manutencao.html" id="link-inicio"><i class="fa-solid fa-house"></i>Início</a></li>
+            <li class="menu-item"><a href="#" data-page="analise semanal.html"><i class="fa-solid fa-chart-line"></i>Análise Semanal</a></li>
+            <li class="menu-item"><a href="#" data-page="manutencao.html" id="link-supervisores"><i class="fa-solid fa-user-tie"></i>Supervisores</a></li> 
+            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-chalkboard-teacher"></i>Treinamentos</a></li>
+            <li class="menu-item"><a href="#" data-page="reunioes e eventos.html"><i class="fa-solid fa-calendar-days"></i>Reuniões/Eventos</a></li>
+        </ul>
+
+        <h3 class="menu-section-title">Fluxos de Atendimento</h3>
+        <ul class="menu-list" id="demanda-items">
+            <li class="menu-item"><a href="#" data-page="emissao.html"><i class="fa-solid fa-file-invoice"></i>Emissão</a></li>
+            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-user-plus"></i>Ingresso</a></li>
+            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-check-double"></i>Validação</a></li>       
+            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-graduation-cap"></i>Educação Continuada</a></li>      
+            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-wrench"></i>Desenvolv. & Qualidade</a></li>
+            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-life-ring"></i>Suporte Técnico</a></li>
+        </ul>
+
+    </div>
+
+    <div class="logout-section">
+        <ul class="menu-list" style="padding: 0; margin: 0;">
+            <li class="menu-item">
+                <a href="#" data-page="logout.html">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Sair
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    </div>
+
+<div class="content content-blurred" id="content">
+    <iframe id="main-frame" src="home-dashboard.html"></iframe>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const menuContainers = [
+            document.getElementById('menu-items'), 
+            document.getElementById('demanda-items') 
+        ];
+        const mainFrame = document.getElementById('main-frame');
+        
+        // Novos elementos para o Modal
+        const loginModalOverlay = document.getElementById('login-modal-overlay');
+        const loginForm = document.getElementById('login-form');
+        const linkSupervisores = document.getElementById('link-supervisores');
+        const linkInicio = document.getElementById('link-inicio'); 
+        const cancelButton = document.getElementById('cancel-button');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginMessage = document.getElementById('login-message');
+        const sidebar = document.getElementById('sidebar');
+        const content = document.getElementById('content');
+
+        // Contas de Acesso
+        const VALID_CREDENTIALS = {
+            'admin': '123456',
+            'super1': 'senha1',
+            'super2': 'senha2',
+            'gerente': 'gerencia'
+        };
+
+        // --- Funções Auxiliares ---
+
+        const removeAllActiveClasses = () => {
+             // Garante que TODOS os links percam a classe 'active', incluindo o logout
+             document.querySelectorAll('.menu-item a').forEach(link => {
+                 link.classList.remove('active');
+             });
+        };
+
+        // --- Funções para o Modal ---
+
+        const showLoginModal = (e) => {
+            e.preventDefault(); 
+            // Remove o 'active' do item de menu clicado antes de abrir o modal
+            removeAllActiveClasses(); 
+            
+            // Adiciona classes de desfoque
+            sidebar.classList.add('content-blurred');
+            content.classList.add('content-blurred');
+
+            // Exibe o modal
+            loginModalOverlay.style.display = 'flex';
+            setTimeout(() => {
+                loginModalOverlay.classList.add('active');
+                usernameInput.focus();
+            }, 10); // Pequeno delay para transição
+        };
+
+        const hideLoginModal = () => {
+            // Remove classes de desfoque
+            sidebar.classList.remove('content-blurred');
+            content.classList.remove('content-blurred');
+
+            // Volta para a página "Início" e a marca como ativa
+            removeAllActiveClasses();
+            if (linkInicio) {
+                linkInicio.classList.add('active');
+                mainFrame.src = linkInicio.getAttribute('data-page');
+            }
+
+            // Esconde o modal
+            loginModalOverlay.classList.remove('active');
+            setTimeout(() => {
+                loginModalOverlay.style.display = 'none';
+                loginMessage.style.display = 'none';
+                loginForm.reset();
+            }, 300); // Espera a transição acabar
+        };
+
+        const handleLogin = (e) => {
+            e.preventDefault();
+            const user = usernameInput.value.trim();
+            const pass = passwordInput.value.trim();
+
+            loginMessage.style.display = 'none';
+
+            if (VALID_CREDENTIALS[user] === pass) {
+                // Login bem-sucedido
+                hideLoginModal();
+                
+                // Marca o link "Supervisores" como ativo
+                removeAllActiveClasses();
+                linkSupervisores.classList.add('active');
+                
+                // Navega para a página restrita (já é a manutencao.html)
+                const pageUrl = linkSupervisores.getAttribute('data-page');
+                mainFrame.src = pageUrl;
+            } else {
+                // Login falhou
+                loginMessage.textContent = 'Usuário ou senha inválidos.';
+                loginMessage.style.display = 'block';
+                passwordInput.value = ''; // Limpa apenas a senha
+                passwordInput.focus();
+            }
+        };
+
+
+        // --- Lógica do Menu ---
+        
+        // Define a página inicial no iframe e o item ativo ao carregar
+        if (linkInicio) {
+              mainFrame.src = linkInicio.getAttribute('data-page'); 
+              linkInicio.classList.add('active'); // Garante que Início está ativo na carga
+        } else {
+              mainFrame.src = "home-dashboard.html"; 
+        }
+
+        // Adiciona listener para o link "Supervisores"
+        linkSupervisores.addEventListener('click', showLoginModal);
+        
+        // Adiciona listener para o botão "Cancelar" (usando a função atualizada)
+        cancelButton.addEventListener('click', hideLoginModal);
+
+        // Adiciona listener para o Formulário de Login
+        loginForm.addEventListener('submit', handleLogin);
+
+        // Adiciona listener para os demais menus (Ajustado)
+        [...menuContainers, document.querySelector('.logout-section')].forEach(container => {
+            if (container) {
+                container.addEventListener('click', (e) => {
+                    const targetLink = e.target.closest('a');
+
+                    // Impede o clique em links se o modal estiver ativo
+                    if (loginModalOverlay.style.display === 'flex') return;
+
+                    // O link "Supervisores" já tem um handler específico (showLoginModal)
+                    if (targetLink && targetLink.id === 'link-supervisores') {
+                        return; 
+                    }
+
+                    if (targetLink && targetLink.hasAttribute('data-page')) {
+                        e.preventDefault(); 
+                        
+                        // Remove ativo de todos
+                        removeAllActiveClasses();
+                        
+                        // Adiciona 'active' no link, exceto no logout
+                        if (!targetLink.parentElement.parentElement.classList.contains('logout-section')) {
+                            targetLink.classList.add('active');
+                        }
+                        
+                        const pageUrl = targetLink.getAttribute('data-page');
+                        mainFrame.src = pageUrl;
+                    }
+                });
+            }
+        });
+
+        // -----------------------------------------------------
+        // --- MEDIDAS DE "SEGURANÇA POR OBSCURIDADE" (MELHORADAS) ---
+        // -----------------------------------------------------
+
+        // Desabilita o menu de contexto (botão direito do mouse)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Desabilita teclas comuns do DevTools e outras
+        document.addEventListener('keydown', function(e) {
+            // F12 check
+            const isF12 = e.key === 'F12' || e.keyCode === 123;
+            // Ctrl+Shift+I check (I = 73)
+            const isCtrlShiftI = e.ctrlKey && e.shiftKey && (e.key === 'I' || e.keyCode === 73);
+            // Ctrl+Shift+J check (J = 74)
+            const isCtrlShiftJ = e.ctrlKey && e.shiftKey && (e.key === 'J' || e.keyCode === 74);
+            // Ctrl+U check (U = 85) - Ver Código Fonte
+            const isCtrlU = e.ctrlKey && (e.key === 'U' || e.keyCode === 85);
+            // Ctrl+S check (S = 83) - Impede Salvar Página
+            const isCtrlS = e.ctrlKey && (e.key === 'S' || e.keyCode === 83);
+            // Ctrl+Shift+C check (C = 67) - Selecionar Elemento
+            const isCtrlShiftC = e.ctrlKey && e.shiftKey && (e.key === 'C' || e.keyCode === 67);
+
+            if (isF12 || isCtrlShiftI || isCtrlU || isCtrlShiftJ || isCtrlS || isCtrlShiftC) {
+                e.preventDefault();
+            }
+        });
+        
+        // Novo: Detecção Ativa de DevTools (console.log)
+        // Se o console estiver aberto, a função 'console.log' com um objeto demora muito mais a ser executada.
+        const devtoolsCheck = () => {
+            const threshold = 100; // Tempo limite em milissegundos
+            const loop = () => {
+                const start = performance.now();
+                // Tenta logar um objeto para forçar o DevTools a inspecionar, o que atrasa a execução se estiver aberto.
+                console.log('%c', 'display: none'); 
+                const end = performance.now();
+                
+                // Se a diferença de tempo for maior que o limite, o DevTools está aberto.
+                if (end - start > threshold) {
+                    // Bloqueio: Redireciona para uma página vazia ou fecha a janela
+                    document.body.innerHTML = '<h1>Acesso negado.</h1>';
+                    // window.close(); // Pode não funcionar na maioria dos navegadores
+                }
+                
+                // Executa a cada X milissegundos
+                setTimeout(loop, 500);
+            };
+            loop(); // Inicia o loop
+        };
+        // Tenta iniciar a checagem se o console estiver disponível
+        if (window.console && window.console.log) {
+            devtoolsCheck();
+        }
+
+        // Inicializa o conteúdo com o blur removido (já que os elementos sidebar e content já tinham a classe 'content-blurred' no HTML para evitar flash)
+        sidebar.classList.remove('content-blurred');
+        content.classList.remove('content-blurred');
+
+
+        // -----------------------------------------------------
+        // --- FIM MEDIDAS DE "SEGURANÇA POR OBSCURIDADE" ---
+        // ------------------------------------------------------
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise Semanal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        /* Variáveis de Cores (Light Mode Otimizado) */
+        :root {
+            --cor-fundo: #f0f4f9;
+            --cor-card: #ffffff;
+            --cor-texto-principal: #212529; 
+            --cor-texto-secundario: #6c757d; 
+            --cor-total: #1e3a5f;
+            --cor-prazo: #20c997;       /* Verde água (No Prazo) */
+            --cor-fora-prazo: #fd7e14;  /* Laranja (Fora do Prazo / Alerta) */
+            --cor-sem-sla: #0dcaf0;     /* Ciano (Sem SLA) */
+            --sombra-suave: 0 10px 30px rgba(0, 0, 0, 0.05); 
+            --sombra-kpi: 0 4px 12px rgba(0, 0, 0, 0.04);
+            --cor-divisoria: #e9ecef;
+            
+            /* CORES PARA A BARRA EMPILHADA DE FLUXO (NM_AREA_SERV) */
+            --fluxo-atrasado: #dc3545; /* Vermelho (Crítico) */
+            --fluxo-vence-hoje: #fd7e14; /* Laranja (Alerta) */
+            --fluxo-sem-sla: #0dcaf0; /* Azul Ciano (Informativo) */
+            --fluxo-a-vencer: #20c997; /* Verde (Saúde) */
+
+            /* NOVO: Estilo para indicar o filtro ativo */
+            --cor-filtro-ativo: #e6f0ff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--cor-fundo);
+            margin: 0;
+            padding: 30px;
+            color: var(--cor-texto-principal);
+            line-height: 1.4;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            margin: 0;
+            display: grid;
+            gap: 30px;
+            box-sizing: border-box;
+        }
+
+        .main-title {
+            font-size: 2em;
+            font-weight: 800;
+            color: var(--cor-total);
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--cor-divisoria);
+            padding-bottom: 10px;
+        }
+        
+        /* NOVO: Estilo para a barra de filtro ativo */
+        .active-filter-bar {
+            background-color: var(--cor-filtro-ativo);
+            color: var(--cor-total);
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--cor-total);
+        }
+
+        .active-filter-bar button {
+            background: none;
+            border: none;
+            color: var(--fluxo-atrasado);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .active-filter-bar button:hover {
+            color: #cc0000;
+        }
+
+        /* --- 1. Cartões de KPIs --- */
+        .kpi-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+        }
+
+        .kpi-card {
+            background-color: var(--cor-card);
+            padding: 30px;
+            border-radius: 16px; 
+            box-shadow: var(--sombra-kpi);
+            border: 1px solid rgba(0, 0, 0, 0.03); 
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .kpi-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px); 
+        }
+        
+        /* NOVO: Estilo para KPI ativo */
+        .kpi-card.active-filter {
+            border: 2px solid var(--cor-total);
+            background-color: var(--cor-filtro-ativo);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .icon-container {
+            font-size: 1.6em;
+            padding: 12px;
+            border-radius: 10px;
+            background-color: transparent; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .kpi-card[data-kpi="total"] .icon-container { color: var(--cor-total); border: 1px solid var(--cor-total); }
+        .kpi-card[data-kpi="prazo"] .icon-container { color: var(--cor-prazo); border: 1px solid var(--cor-prazo); }
+        .kpi-card[data-kpi="fora-prazo"] .icon-container { color: var(--cor-fora-prazo); border: 1px solid var(--cor-fora-prazo); }
+        .kpi-card[data-kpi="sem-sla"] .icon-container { color: var(--cor-sem-sla); border: 1px solid var(--cor-sem-sla); }
+
+        .kpi-value {
+            font-size: 3.5em; 
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 5px;
+        }
+
+        .kpi-card[data-kpi="total"] .kpi-value { color: var(--cor-total); }
+        .kpi-card[data-kpi="prazo"] .kpi-value { color: var(--cor-prazo); }
+        .kpi-card[data-kpi="fora-prazo"] .kpi-value { color: var(--cor-fora-prazo); }
+        .kpi-card[data-kpi="sem-sla"] .kpi-value { color: var(--cor-sem-sla); }
+
+        .kpi-label {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--cor-texto-secundario);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        /* --- 2. Estrutura dos Gráficos --- */
+        .chart-row {
+            display: grid;
+            gap: 30px;
+        }
+        
+        .chart-row-1 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .chart-row-2 {
+            grid-template-columns: 2.5fr 1fr;
+        }
+
+        .chart-box {
+            background-color: var(--cor-card);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--sombra-suave);
+            min-height: 400px;
+            box-sizing: border-box;
+        }
+
+        .chart-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--cor-divisoria);
+        }
+        
+        /* Otimização da Simulação de Gráfico de Barras */
+        .chart-simulation {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            height: calc(100% - 70px); 
+        }
+        
+        .bar-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.95em;
+            /* NOVO: Torna a barra clicável */
+            cursor: pointer; 
+            padding: 5px 0;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        /* NOVO: Estilo de hover e ativo para itens de barra */
+        .bar-item:hover {
+            background-color: var(--cor-divisoria);
+        }
+        .bar-item.active-filter {
+            background-color: var(--cor-filtro-ativo);
+            border: 1px solid var(--cor-total);
+            padding: 4px 5px; /* Ajuste para o padding */
+        }
+
+
+        .bar-label {
+            font-weight: 600;
+            color: var(--cor-texto-principal);
+            max-width: 45%; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* Ajuste específico para o Fluxo (Top 10) - Mais espaço para a barra */
+        #chart-fluxos .bar-label {
+            max-width: 30%; 
+        }
+        #chart-fluxos .bar-value {
+            min-width: 50px;
+        }
+
+
+        .bar-value {
+            font-weight: 800;
+            color: var(--cor-total);
+            margin-left: auto;
+            text-align: right;
+            transition: color 0.3s;
+        }
+
+        .bar-line {
+            height: 16px;
+            background-color: var(--cor-divisoria);
+            border-radius: 8px;
+            overflow: hidden;
+            flex-grow: 1;
+            margin: 0 20px;
+            /* ADICIONA FLEXBOX PARA SUPORTAR A BARRA EMPILHADA */
+            display: flex; 
+            padding: 0;
+        }
+        
+        /* Barra simples para Célula/Status/Sistema */
+        .bar-line.simple {
+            display: block; /* Desativa o flex para barras simples */
+        }
+        .bar-line.simple .bar-fill {
+            height: 100%;
+        }
+
+        /* Classes de cores de distribuição simples */
+        .bar-fill.normal { background: linear-gradient(to right, var(--cor-total), #4d8ce8); }
+        .bar-fill.status-prazo { background: linear-gradient(to right, var(--cor-fora-prazo), var(--cor-prazo)); }
+        .bar-fill.sistema-origem { background: linear-gradient(to right, #0dcaf0, #007bff); }
+        
+        /* NOVO: Estilos para as DIVISÕES da barra empilhada */
+        .bar-segment {
+            height: 100%;
+        }
+        
+        .bar-segment.atrasado { background-color: var(--fluxo-atrasado); }
+        .bar-segment.vence-hoje { background-color: var(--fluxo-vence-hoje); }
+        .bar-segment.sem-sla { background-color: var(--fluxo-sem-sla); }
+        .bar-segment.a-vencer { background-color: var(--fluxo-a-vencer); }
+        
+        /* Dica visual ao passar o mouse na barra empilhada */
+        #chart-fluxos .bar-line:hover .bar-segment {
+            opacity: 0.9;
+        }
+
+        .chart-info-box {
+            background-color: #f0f4f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 5px solid var(--cor-total);
+        }
+        .chart-info-box p {
+            margin: 0;
+            font-size: 0.9em;
+            color: var(--cor-texto-secundario);
+        }
+        .chart-info-box strong {
+            color: var(--cor-total);
+        }
+
+        /* Container do gráfico de linha */
+        .chart-line-simulation {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding-bottom: 20px; 
+            box-sizing: border-box;
+        }
+        
+        /* Estilos do gráfico de linha */
+        #lineChartProjecao {
+            flex-grow: 1;
+            max-height: 250px; /* Garante que ele não ocupe todo o espaço */
+        }
+        
+        .highlight {
+            font-weight: 700;
+            color: var(--cor-fora-prazo); /* Cor de alerta para o pico */
+        }
+
+        /* NOVO: Estilo para mensagem de erro de dados vazios */
+        .no-data-message {
+            grid-column: 1 / span 4; 
+            color: var(--fluxo-atrasado); 
+            padding: 30px; 
+            text-align: center; 
+            background: var(--cor-card); 
+            border-radius: 16px; 
+            box-shadow: var(--sombra-kpi);
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+
+        <h1 class="main-title">Análise Semanal</h1>
+        
+        <div id="active-filter-display"></div>
+
+        <div class="kpi-cards" id="kpi-cards-container">
+            <div class="kpi-card" data-kpi="total" data-filter-col="STATUS_FILTRO_KPI" data-filter-val="TOTAL">
+                <div class="card-header">
+                    <span class="kpi-label">Quantidade de Atendimentos</span>
+                    <span class="icon-container">⚙️</span>
+                </div>
+                <div class="kpi-value" id="kpi-total">...</div>
+            </div>
+
+            <div class="kpi-card" data-kpi="prazo" data-filter-col="STATUS_FILTRO_KPI" data-filter-val="A_VENCER">
+                <div class="card-header">
+                    <span class="kpi-label">A Vencer</span>
+                    <span class="icon-container">✅</span>
+                </div>
+                <div class="kpi-value" id="kpi-prazo">...</div>
+            </div>
+
+            <div class="kpi-card" data-kpi="fora-prazo" data-filter-col="STATUS_FILTRO_KPI" data-filter-val="ATRASADO">
+                <div class="card-header">
+                    <span class="kpi-label">Fora do Prazo</span>
+                    <span class="icon-container">⚠️</span>
+                </div>
+                <div class="kpi-value" id="kpi-fora-prazo">...</div>
+            </div>
+
+            <div class="kpi-card" data-kpi="sem-sla" data-filter-col="STATUS_FILTRO_KPI" data-filter-val="SEM_SLA">
+                <div class="card-header">
+                    <span class="kpi-label">Sem SLA</span>
+                    <span class="icon-container">⏳</span>
+                </div>
+                <div class="kpi-value" id="kpi-sem-sla">...</div>
+            </div>
+        </div>
+
+        <div class="chart-row chart-row-1">
+
+            <div class="chart-box">
+                <div class="chart-title">Atendimentos por Célula (Distribuição)</div>
+                <div class="chart-simulation" id="chart-celula" data-chart-col="NM_CELULA">
+                    <p style="font-size: 0.9em; color: var(--cor-texto-secundario);">Carregando dados das células...</p>
+                    <div class="chart-info-box">
+                        <p><strong>Foco:</strong> <span id="info-celula">Aguardando dados...</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-box">
+                <div class="chart-title">Status por Data Prazo</div>
+                <div class="chart-simulation" id="chart-data-prazo" data-chart-col="NM_STATUS_PRAZO_AND">
+                    <p style="font-size: 0.9em; color: var(--cor-texto-secundario);">Carregando dados de status...</p>
+                    <div class="chart-info-box">
+                        <p><strong>Tendência:</strong> <span id="info-data-prazo">Aguardando dados...</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-box">
+                <div class="chart-title">Volume por Sistema</div>
+                <div class="chart-simulation" id="chart-sistema" data-chart-col="NM_SISTEMA">
+                    <p style="font-size: 0.9em; color: var(--cor-texto-secundario);">Carregando dados de sistema...</p>
+                    <div class="chart-info-box">
+                        <p><strong>Ação:</strong> <span id="info-sistema">Aguardando dados...</span></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="chart-row chart-row-2">
+
+            <div class="chart-box">
+                <div class="chart-title">Principais Áreas de Serviço (Top 10)</div>
+                <div class="chart-simulation" id="chart-fluxos" data-chart-col="NM_AREA_SERV">
+                    <div style="text-align: center; color: var(--cor-texto-secundario);">
+                        Carregando dados dos fluxos/áreas...
+                    </div>
+                    
+                    <div id="legenda-fluxos" style="margin-top: auto; padding-top: 15px; border-top: 1px dashed var(--cor-divisoria); font-size: 0.85em; color: var(--cor-texto-secundario); text-align: center;">
+                        <span class="status-legenda atrasado">🔴 Atrasado</span> | 
+                        <span class="status-legenda vence-hoje">🟠 Vence Hoje</span> | 
+                        <span class="status-legenda sem-sla">🔵 Sem SLA</span> |
+                        <span class="status-legenda a-vencer">🟢 A Vencer</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-box">
+                <div class="chart-title">Projeção de Carga de Trabalho (Próx. 7 Dias)</div>
+                <div class="chart-line-simulation" id="chart-projecao">
+                    
+                    <canvas id="lineChartProjecao" style="max-height: 250px; margin-bottom: 20px;"></canvas>
+                    
+                    <div style="text-align: center;">
+                        <div style="margin-top: 0;"> 
+                        <p class="detail">Previsão de Atendimentos no Dia de Pico:</p>
+                        <div class="kpi-value" id="projecao-pico">...</div>
+                        <p class="highlight" id="projecao-data">Aguardando data...</p>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        // NOVO: Variável global para armazenar todos os dados e o estado do filtro
+        let allAtendimentos = [];
+        let currentFilter = { column: null, value: null, label: null };
+        const jsonFilePath = 'analise semanal.json';
+
+
+        // Estado inicial de dados vazios para fallback
+        const emptyState = {
+            kpis: { total: 0, prazo: 0, fora_prazo: 0, sem_sla: 0 },
+            celulas: [],
+            status_prazo: [],
+            sistemas: [],
+            fluxos: [],
+            projecao: { pico: 0, data: "NENHUM DADO ENCONTRADO" },
+            projecao7d: { labels: [], counts: [] },
+            insights: {
+                celula: "Não foi possível calcular a distribuição por Célula, pois não há dados disponíveis.",
+                status_prazo: "Não foi possível calcular a tendência de Status, pois não há dados disponíveis.",
+                sistema: "Não foi possível calcular o volume por Sistema de Origem, pois não há dados disponíveis.",
+            }
+        };
+
+
+        // --- FUNÇÕES DE PROCESSAMENTO DE DADOS ---
+
+        function formatNumber(num) {
+            if (typeof num === 'number') {
+                 return num.toLocaleString('pt-BR');
+            }
+            return String(num).replace('.', ','); 
+        }
+
+        // Função auxiliar para formatar a data (DD/MM)
+        function formatDateShort(dateString) {
+            try {
+                // Adiciona 'T00:00:00' para garantir que Date interprete corretamente no fuso local
+                const dateObj = new Date(dateString.includes('T') ? dateString : dateString + 'T00:00:00');
+                // Formata para DD/MM
+                return dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            } catch (e) {
+                return dateString;
+            }
+        }
+        
+        /**
+         * Calcula a frequência dos valores em uma coluna (chave) do array.
+         */
+        function calcularFrequencia(data, key) {
+            const counts = {};
+            data.forEach(item => {
+                const value = item[key] || "Não Informado";
+                counts[value] = (counts[value] || 0) + 1;
+            });
+
+            return Object.keys(counts)
+                .map(nome => ({ nome, valor: counts[nome] }))
+                .sort((a, b) => b.valor - a.valor);
+        }
+
+        /**
+         * Mapeia o NM_STATUS_PRAZO_AND para uma chave simples.
+         * É usada em processarDadosDoArray e na lógica de filtro.
+         * @param {string} statusPrazo - O valor do campo NM_STATUS_PRAZO_AND
+         * @returns {string} - A chave simplificada ('ATRASADO', 'VENCE HOJE', 'A_VENCER', 'SEM_SLA')
+         */
+        function mapStatusToKey(statusPrazo) {
+             const status = (statusPrazo || "Não tem SLA").trim();
+             
+             if (status === '1. Atrasado') {
+                 return 'ATRASADO';
+             } else if (status === '2. Vence hoje') {
+                 return 'VENCE HOJE';
+             } else if (status === 'Não tem SLA') {
+                 return 'SEM SLA';
+             } 
+             // Qualquer outro valor ("3. Vence em 1 dia", "4. Vence em 2 dias" etc.) é considerado 'A VENCER'.
+             else {
+                 return 'A VENCER';
+             }
+        }
+        
+        /**
+         * Calcula o Top 10 por NM_AREA_SERV e conta a distribuição de NM_STATUS_PRAZO_AND para cada área.
+         */
+        function calcularFluxosTop10(atendimentos, areaServKey, statusPrazoKey) {
+            const fluxosMap = new Map();
+
+            atendimentos.forEach(item => {
+                const area = item[areaServKey] || "Área Não Informada";
+                const statusSimplificado = mapStatusToKey(item[statusPrazoKey]);
+                
+                if (!fluxosMap.has(area)) {
+                    fluxosMap.set(area, { total: 0, statusCounts: { 'ATRASADO': 0, 'VENCE HOJE': 0, 'SEM SLA': 0, 'A VENCER': 0 } });
+                }
+
+                const entry = fluxosMap.get(area);
+                entry.total++;
+                // O status simplificado pode ser 'ATRASADO', 'VENCE HOJE', 'SEM SLA' ou 'A VENCER'
+                // O status 'A VENCER' (no plural) no counts é o que inclui os vencimentos futuros
+                entry.statusCounts[statusSimplificado === 'A VENCER' ? 'A VENCER' : statusSimplificado]++;
+            });
+
+            let fluxos = Array.from(fluxosMap.entries())
+                .map(([nome, data]) => ({ nome, valor: data.total, statusCounts: data.statusCounts }))
+                .sort((a, b) => b.valor - a.valor);
+
+            return fluxos.slice(0, 10);
+        }
+        
+        /**
+         * Calcula o Dia de Pico de Atendimentos com base na DT_PRAZO
+         */
+        function getDiaDePico(dataArray) {
+            // ... (implementação original, sem mudanças)
+            if (!dataArray || dataArray.length === 0) {
+                return { pico: 0, data: "N/D" };
+            }
+
+            const contagemPorDia = dataArray.reduce((acc, item) => {
+                const dataPrazo = item.DT_PRAZO ? String(item.DT_PRAZO).substring(0, 10) : null;
+                
+                if (!dataPrazo) {
+                     return acc;
+                }
+
+                acc[dataPrazo] = (acc[dataPrazo] || 0) + 1;
+                return acc;
+            }, {});
+
+            let diaDePico = 'N/D';
+            let maxCount = 0;
+
+            for (const dia in contagemPorDia) {
+                if (contagemPorDia[dia] > maxCount) {
+                    maxCount = contagemPorDia[dia];
+                    diaDePico = dia;
+                }
+            }
+            
+            let dataFormatada = diaDePico;
+            if (diaDePico !== 'N/D') {
+                 try {
+                     const dateObj = new Date(diaDePico.includes('T') ? diaDePico : diaDePico + 'T00:00:00');
+                     dataFormatada = dateObj.toLocaleDateString('pt-BR'); 
+                 } catch (e) {
+                     dataFormatada = diaDePico;
+                 }
+            }
+
+            return { pico: maxCount, data: dataFormatada };
+        }
+        
+        /**
+         * Agrupa atendimentos por DT_PRAZO, filtra para os próximos 7 dias e formata para Chart.js.
+         */
+        function calcularProjecao7Dias(dataArray) {
+            // ... (implementação original, sem mudanças)
+             const contagemPorDia = dataArray.reduce((acc, item) => {
+                const dataPrazo = item.DT_PRAZO ? String(item.DT_PRAZO).substring(0, 10) : null;
+                if (dataPrazo) {
+                    acc[dataPrazo] = (acc[dataPrazo] || 0) + 1;
+                }
+                return acc;
+            }, {});
+
+            const labels = [];
+            const counts = [];
+            const diasProjecao = 7;
+            
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0); 
+
+            for (let i = 0; i < diasProjecao; i++) {
+                const dataDia = new Date(hoje);
+                dataDia.setDate(hoje.getDate() + i); 
+                
+                const yyyy = dataDia.getFullYear();
+                const mm = String(dataDia.getMonth() + 1).padStart(2, '0');
+                const dd = String(dataDia.getDate()).padStart(2, '0');
+                const chaveData = `${yyyy}-${mm}-${dd}`;
+                
+                labels.push(formatDateShort(chaveData)); 
+                
+                counts.push(contagemPorDia[chaveData] || 0);
+            }
+            
+            return { labels, counts };
+        }
+
+
+        /**
+         * Analisa o array de atendimentos e calcula KPIs e Distribuições.
+         */
+        function processarDadosDoArray(atendimentos) {
+            if (!Array.isArray(atendimentos) || atendimentos.length === 0) {
+                // Retorna o estado vazio se o array estiver vazio
+                return emptyState;
+            }
+
+            let total = atendimentos.length;
+            let noPrazo = 0;    // Passa a contar "A VENCER" e "VENCE HOJE"
+            let foraPrazo = 0; // Passa a contar SOMENTE "ATRASADO"
+            let semSla = 0;    // Passa a contar "Não tem SLA"
+
+            atendimentos.forEach(item => {
+                const statusPrazo = (item.NM_STATUS_PRAZO_AND || "Não tem SLA").trim();
+                
+                // 1. Sem Acordo SLA
+                if (statusPrazo === 'Não tem SLA') {
+                    semSla++;
+                } 
+                // 2. Atrasado (Mapeado para Fora do Prazo - alerta)
+                else if (statusPrazo === '1. Atrasado') {
+                    foraPrazo++;
+                }
+                // 3. A Vencer e Vence Hoje (Mapeado para No Prazo)
+                else if (statusPrazo === '2. Vence hoje' || 
+                         statusPrazo.startsWith('3. Vence') || 
+                         statusPrazo.startsWith('4. Vence') || 
+                         statusPrazo.startsWith('5. Vence') || 
+                         statusPrazo.startsWith('6. Vence') || 
+                         statusPrazo.startsWith('7. Vence') || 
+                         statusPrazo === '8. Vencimentos posteriores') {
+                    noPrazo++;
+                }
+                // Se cair aqui, o status é desconhecido ou não mapeado. Não é contado em nenhum KPI explícito.
+            });
+            
+            let kpis = {
+                total: total,
+                // noPrazo agora conta a soma dos status A Vencer (2. a 8.)
+                prazo: noPrazo,
+                // foraPrazo agora conta SOMENTE Atrasado (1.)
+                fora_prazo: foraPrazo,
+                // semSla agora conta "Não tem SLA"
+                sem_sla: semSla
+            };
+            
+            // Reajusta o sem_sla para contabilizar quaisquer itens não classificados, garantindo a soma total.
+            // Esta lógica garante que os itens não mapeados acima (se houver) vão para Sem SLA
+            kpis.sem_sla = total - kpis.prazo - kpis.fora_prazo;
+
+
+            const celulas = calcularFrequencia(atendimentos, 'NM_CELULA');
+            const status_prazo = calcularFrequencia(atendimentos, 'NM_STATUS_PRAZO_AND');
+            const sistemas = calcularFrequencia(atendimentos, 'NM_SISTEMA');
+            const fluxos = calcularFluxosTop10(atendimentos, 'NM_AREA_SERV', 'NM_STATUS_PRAZO_AND');
+            
+            const projecao = getDiaDePico(atendimentos);
+            const projecao7d = calcularProjecao7Dias(atendimentos); 
+
+            // Usa os insights do emptyState em caso de zero, ou preenche insights básicos se houver dados
+            const insights = {
+                celula: celulas.length > 0 ? `A célula mais representativa é ${celulas[0].nome} com ${formatNumber(celulas[0].valor)} atendimentos.` : emptyState.insights.celula,
+                status_prazo: status_prazo.length > 0 ? `O status mais comum é ${status_prazo[0].nome} com ${formatNumber(status_prazo[0].valor)} ocorrências.` : emptyState.insights.status_prazo,
+                sistema: sistemas.length > 0 ? `O sistema de origem mais frequente é ${sistemas[0].nome} com ${formatNumber(sistemas[0].valor)} atendimentos.` : emptyState.insights.sistema,
+            };
+
+
+            return { kpis, celulas, status_prazo, sistemas, fluxos, insights, projecao, projecao7d };
+        }
+        
+        /**
+         * Renderiza o gráfico de linha de projeção (7 Dias) usando Chart.js
+         */
+        function renderProjecaoChart(chartData) {
+            // ... (implementação original, sem mudanças)
+            const ctx = document.getElementById('lineChartProjecao').getContext('2d');
+            
+            if (window.lineChartInstance) {
+                window.lineChartInstance.destroy();
+            }
+
+            // Verifica se há dados para ajustar o estilo
+            const hasData = chartData.counts.some(c => c > 0);
+            const backgroundColor = hasData ? 'rgba(0, 86, 179, 0.1)' : 'transparent';
+            const borderColor = hasData ? 'var(--cor-total)' : 'var(--cor-divisoria)';
+            const pointBackgroundColor = hasData ? 'var(--cor-total)' : 'var(--cor-divisoria)';
+            
+            window.lineChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Volume de Atendimentos',
+                        data: chartData.counts,
+                        
+                        // --- ESTILOS OTIMIZADOS ---
+                        backgroundColor: backgroundColor, 
+                        borderColor: borderColor,          
+                        borderWidth: 3,                         
+                        pointRadius: 5,                        
+                        pointBackgroundColor: pointBackgroundColor,
+                        pointBorderColor: 'var(--cor-card)',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 7,                     
+                        pointHoverBackgroundColor: 'var(--cor-fora-prazo)', 
+                        pointHoverBorderColor: 'var(--cor-card)',
+                        fill: true,                            
+                        tension: 0.4                             
+                        // --- FIM ESTILOS OTIMIZADOS ---
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, 
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            titleFont: {
+                                size: 20, 
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 20, 
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += formatNumber(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    if (Math.floor(value) === value) {
+                                        return formatNumber(value); 
+                                    }
+                                }
+                            },
+                            grid: {
+                                display: true,
+                                color: 'var(--cor-divisoria)' 
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false 
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        // --- FUNÇÕES DE FILTRO E RE-RENDERIZAÇÃO ---
+
+        /**
+         * Aplica um filtro ao dataset completo e atualiza o dashboard.
+         * @param {string | null} column - A coluna para filtrar (ex: 'NM_CELULA'). Use null para remover o filtro.
+         * @param {string | null} value - O valor a ser filtrado na coluna (ex: 'Célula A'). Use null para remover o filtro.
+         * @param {string | null} label - Rótulo amigável para exibição.
+         */
+        function applyFilter(column, value, label) {
+            
+            // Se o filtro clicado for o mesmo do atual, reseta o filtro (toggle)
+            if (column === currentFilter.column && value === currentFilter.value && column !== 'STATUS_FILTRO_KPI') {
+                 column = null;
+                 value = null;
+                 label = null;
+            } 
+            
+            // Se for KPI de TOTAL, sempre reseta.
+            if (value === 'TOTAL') {
+                 column = null;
+                 value = null;
+                 label = null;
+            }
+
+            // Atualiza o estado global
+            currentFilter = { column, value, label };
+            
+            let filteredAtendimentos = [];
+            
+            if (!column || !value) {
+                // Sem filtro, usa todos os dados
+                filteredAtendimentos = allAtendimentos;
+            } else if (column === 'STATUS_FILTRO_KPI') {
+                // Filtro especial de KPI (usando NM_STATUS_PRAZO_AND mapeado)
+                filteredAtendimentos = allAtendimentos.filter(item => {
+                    const mappedStatus = mapStatusToKey(item.NM_STATUS_PRAZO_AND);
+                    if (value === 'A_VENCER') {
+                         return mappedStatus === 'A VENCER' || mappedStatus === 'VENCE HOJE';
+                    } else if (value === 'ATRASADO') {
+                        return mappedStatus === 'ATRASADO';
+                    } else if (value === 'SEM_SLA') {
+                        return mappedStatus === 'SEM SLA';
+                    }
+                    return false;
+                });
+            } else {
+                // Filtro de colunas normais (Célula, Sistema, Fluxo)
+                filteredAtendimentos = allAtendimentos.filter(item => (item[column] || "Não Informado") === value);
+            }
+
+            // Re-processa e re-renderiza o dashboard com os dados filtrados
+            const dataToRender = processarDadosDoArray(filteredAtendimentos);
+            renderDashboard(dataToRender);
+            
+            // Atualiza o indicador visual de filtro
+            updateFilterDisplay(label, column, value);
+        }
+        
+        /**
+         * Atualiza a barra de filtro ativo na interface.
+         */
+        function updateFilterDisplay(label, column, value) {
+            const filterBar = document.getElementById('active-filter-display');
+            
+            // Remove a classe 'active-filter' de todos os elementos para resetar o visual
+            document.querySelectorAll('.kpi-card, .bar-item').forEach(el => {
+                 el.classList.remove('active-filter');
+            });
+            
+            if (label) {
+                filterBar.innerHTML = `
+                    <div class="active-filter-bar">
+                        <span>Filtro Ativo: **${label}**</span>
+                        <button onclick="applyFilter(null, null, null)">✖ Limpar Filtro</button>
+                    </div>
+                `;
+                
+                // Adiciona a classe 'active-filter' ao elemento clicado (se for um KPI ou uma barra)
+                // Se for KPI
+                const activeKpi = document.querySelector(`.kpi-card[data-filter-col="${column}"][data-filter-val="${value}"]`);
+                if (activeKpi) {
+                    activeKpi.classList.add('active-filter');
+                } 
+                // Se for barra de gráfico, a lógica de adição da classe 'active-filter' é feita dentro de renderBarChart
+                
+            } else {
+                filterBar.innerHTML = '';
+            }
+        }
+
+        /**
+         * FUNÇÃO: Adiciona Event Listeners para os gráficos e KPIs
+         */
+        function setupEventListeners() {
+            
+            // 1. KPIs
+            document.querySelectorAll('.kpi-card').forEach(card => {
+                const column = card.getAttribute('data-filter-col');
+                const value = card.getAttribute('data-filter-val');
+                const label = card.querySelector('.kpi-label').textContent;
+                
+                if (column && value) {
+                    card.addEventListener('click', () => {
+                         applyFilter(column, value, label);
+                    });
+                    
+                    // Se for o KPI ativo, adiciona a classe visual.
+                    if (currentFilter.column === column && currentFilter.value === value) {
+                         card.classList.add('active-filter');
+                    }
+                }
+            });
+
+            // 2. Barras de Gráfico
+            // Os event listeners para as barras de gráfico são adicionados dentro de renderBarChart e renderDashboard (para fluxos),
+            // pois os elementos das barras são recriados a cada renderização.
+            
+        }
+
+        // --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ---
+        function renderDashboard(data) {
+            
+            let kpis, celulas, status_prazo, sistemas, fluxos, projecao, projecao7d, insights;
+
+            // Se 'data' é um array de atendimentos (só acontece no primeiro carregamento, mas mantemos por segurança)
+            if (Array.isArray(data)) {
+                const processed = processarDadosDoArray(data);
+                // ... (atribuições de variáveis)
+                kpis = processed.kpis;
+                celulas = processed.celulas;
+                status_prazo = processed.status_prazo;
+                sistemas = processed.sistemas;
+                fluxos = processed.fluxos; 
+                projecao = processed.projecao; 
+                projecao7d = processed.projecao7d; 
+                insights = processed.insights;
+            } else {
+                // Se 'data' for um objeto (resultante do processamento de dados filtrados ou emptyState)
+                kpis = data.kpis || emptyState.kpis;
+                celulas = data.celulas || emptyState.celulas;
+                status_prazo = data.status_prazo || emptyState.status_prazo;
+                sistemas = data.sistemas || emptyState.sistemas;
+                fluxos = data.fluxos || emptyState.fluxos; 
+                projecao = data.projecao || emptyState.projecao;
+                projecao7d = data.projecao7d || emptyState.projecao7d; 
+                insights = data.insights || emptyState.insights;
+            }
+
+            
+            // 1. Renderizar KPIs
+            document.getElementById('kpi-total').textContent = formatNumber(kpis.total || 0);
+            document.getElementById('kpi-prazo').textContent = formatNumber(kpis.prazo || 0);
+            document.getElementById('kpi-fora-prazo').textContent = formatNumber(kpis.fora_prazo || 0);
+            document.getElementById('kpi-sem-sla').textContent = formatNumber(kpis.sem_sla || 0);
+            
+            const totalAtendimentos = kpis.total || 1;
+
+
+            // 2. Renderizar Gráfico de Células (Barra simples)
+            const celulaCol = document.getElementById('chart-celula').getAttribute('data-chart-col');
+            renderBarChart('chart-celula', celulas, totalAtendimentos, 'normal', insights.celula, 'info-celula', celulaCol);
+
+            // 3. Renderizar Gráfico de Status (Barra simples)
+            const statusCol = document.getElementById('chart-data-prazo').getAttribute('data-chart-col');
+            renderBarChart('chart-data-prazo', status_prazo, totalAtendimentos, 'status-prazo', insights.status_prazo, 'info-data-prazo', statusCol);
+
+            // 4. Renderizar Gráfico de Sistema (Barra simples)
+            const sistemaCol = document.getElementById('chart-sistema').getAttribute('data-chart-col');
+            renderBarChart('chart-sistema', sistemas, totalAtendimentos, 'sistema-origem', insights.sistema, 'info-sistema', sistemaCol);
+
+
+            // 5. Renderizar FLUXOS (NM_AREA_SERV) - BARRA EMPILHADA
+            const fluxoContainer = document.getElementById('chart-fluxos');
+            const fluxoCol = fluxoContainer.getAttribute('data-chart-col');
+            
+            // Mantém a legenda original para reinserir
+            const legendaDiv = document.getElementById('legenda-fluxos');
+            // Remove o conteúdo (exceto a legenda)
+            let innerContent = fluxoContainer.innerHTML;
+            innerContent = innerContent.replace(/<div id="legenda-fluxos".*?<\/div>/s, '');
+            fluxoContainer.innerHTML = '';
+            
+            let htmlFluxos = '';
+            
+            if (fluxos.length > 0) {
+                fluxos.forEach(item => {
+                    const totalFluxo = item.valor;
+                    const counts = item.statusCounts;
+                    
+                    const statusOrder = ['ATRASADO', 'VENCE HOJE', 'A VENCER', 'SEM SLA'];
+                    let segmentsHTML = '';
+                    
+                    statusOrder.forEach(status => {
+                        const count = counts[status] || 0;
+                        if (count > 0) {
+                            // Certifica-se de que o percentual é calculado sobre o total do fluxo, não o total global.
+                            const percent = ((count / totalFluxo) * 100); 
+                            const statusClass = status.toLowerCase().replace(/\s/g, '-');
+                            
+                            segmentsHTML += `<div class="bar-segment ${statusClass}" style="width: ${percent.toFixed(1)}%;" title="${status}: ${formatNumber(count)}"></div>`;
+                        }
+                    });
+                    
+                    // Adiciona a barra de preenchimento de fundo para garantir que o contêiner não fique vazio se todos os counts forem zero
+                    if (segmentsHTML === '') {
+                        segmentsHTML = `<div class="bar-segment sem-sla" style="width: 100%; opacity: 0.2;" title="Sem Status/Dados: ${formatNumber(totalFluxo)}"></div>`;
+                    }
+                    
+                    const activeClass = (currentFilter.column === fluxoCol && currentFilter.value === item.nome) ? 'active-filter' : '';
+
+                    htmlFluxos += `
+                        <div class="bar-item ${activeClass}" 
+                             data-filter-col="${fluxoCol}" 
+                             data-filter-val="${item.nome}"
+                             data-filter-label="Área: ${item.nome}"
+                             onclick="applyFilter(this.getAttribute('data-filter-col'), this.getAttribute('data-filter-val'), this.getAttribute('data-filter-label'))"
+                        >
+                            <span class="bar-label" title="${item.nome}">${item.nome}</span>
+                            <div class="bar-line">
+                                ${segmentsHTML}
+                            </div>
+                            <span class="bar-value" style="color: var(--cor-total);">${formatNumber(item.valor)}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                 htmlFluxos = `<div style="text-align: center; color: var(--cor-texto-secundario); padding: 50px 0;">${emptyState.insights.celula}</div>`;
+            }
+
+            fluxoContainer.innerHTML = htmlFluxos;
+            if (legendaDiv) {
+                fluxoContainer.appendChild(legendaDiv);
+            }
+
+
+            // 6. Renderizar Projeção e o NOVO Gráfico
+            document.getElementById('projecao-pico').textContent = formatNumber(projecao.pico);
+            // Verifica se há dados de pico ou se é o estado vazio
+            document.getElementById('projecao-data').textContent = projecao.data !== 'N/D' ? `Pico em ${projecao.data}` : 'NENHUM DADO ENCONTRADO';
+            
+            // Chamada para renderizar o gráfico de linha com o design aprimorado
+            renderProjecaoChart(projecao7d);
+            
+            // Garante que o estado visual dos KPIs seja atualizado após a renderização
+            setupEventListeners(); 
+        }
+        
+        /**
+         * FUNÇÃO: renderBarChart (Para os gráficos simples - Célula, Status, Sistema)
+         * NOVO PARÂMETRO: chartColumnName
+         */
+        function renderBarChart(containerId, data, totalGlobal, barClass, insightText, insightElementId, chartColumnName) {
+            const container = document.getElementById(containerId);
+            let htmlBarras = '';
+            
+            // Preserva e remove temporariamente a info box
+            let infoBoxElement = document.getElementById(insightElementId) ? document.getElementById(insightElementId).parentNode.parentNode : null;
+            let infoBoxHTML = infoBoxElement ? infoBoxElement.outerHTML : '';
+            if (infoBoxElement) {
+                infoBoxElement.remove();
+            }
+            
+            // Remove o conteúdo anterior para recriar as barras
+            container.innerHTML = '';
+
+
+            if (data.length > 0) {
+                const maxValor = data[0].valor || 1; 
+                data.forEach(item => {
+                    const percent = (item.valor / maxValor) * 100;
+                    const percentualTotal = ((item.valor / totalGlobal) * 100).toFixed(1);
+                    
+                    const activeClass = (currentFilter.column === chartColumnName && currentFilter.value === item.nome) ? 'active-filter' : '';
+                    
+                    // Adiciona o evento de clique inline para simplificar a lógica (recriação de elementos)
+                    htmlBarras += `
+                        <div class="bar-item ${activeClass}"
+                             data-filter-col="${chartColumnName}" 
+                             data-filter-val="${item.nome}"
+                             data-filter-label="${chartColumnName.replace('NM_', '').replace('_', ' ')}: ${item.nome}"
+                             onclick="applyFilter(this.getAttribute('data-filter-col'), this.getAttribute('data-filter-val'), this.getAttribute('data-filter-label'))"
+                        >
+                            <span class="bar-label" title="${item.nome}">${item.nome}</span>
+                            <div class="bar-line simple">
+                                <div class="bar-fill ${barClass}" style="width: ${percent}%;"></div>
+                            </div>
+                            <span class="bar-value" style="color: var(--cor-total);">${formatNumber(item.valor)} (${percentualTotal}%)</span>
+                        </div>
+                    `;
+                });
+            } else {
+                 htmlBarras = `<div style="text-align: center; color: var(--cor-texto-secundario); padding: 50px 0;">${emptyState.insights.celula}</div>`;
+            }
+
+            container.innerHTML = htmlBarras;
+            
+            // Reinsere a info box
+            if (infoBoxHTML) {
+                container.insertAdjacentHTML('beforeend', infoBoxHTML);
+                // O insightElementId precisa ser re-obtido após a reinserção
+                document.getElementById(insightElementId).innerHTML = insightText || emptyState.insights.celula;
+            } else {
+                // Caso não tenha info box
+                // Cria uma div temporária para conter a informação
+                const tempDiv = document.createElement('div');
+                tempDiv.className = 'chart-info-box';
+                tempDiv.innerHTML = `<p><strong>Foco:</strong> <span id="${insightElementId}">${insightText || emptyState.insights.celula}</span></p>`;
+                container.appendChild(tempDiv);
+            }
+        }
+
+
+        // --- CARREGAMENTO DE DADOS (USANDO FETCH) ---
+
+        let isDataLoadedSuccessfully = false; // Flag para rastrear sucesso/falha
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            let dataToRender;
+            let errorMessage = null;
+
+            try {
+                // Tenta carregar o arquivo JSON do usuário
+                const response = await fetch(jsonFilePath);
+                
+                if (!response.ok) {
+                    errorMessage = `Erro ao carregar o arquivo: ${response.statusText}. Status: ${response.status}`;
+                    throw new Error(errorMessage);
+                }
+                
+                // Armazena o dataset completo na variável global
+                allAtendimentos = await response.json(); 
+                dataToRender = allAtendimentos;
+                isDataLoadedSuccessfully = true;
+
+            } catch (error) {
+                // *** MODIFICAÇÃO PRINCIPAL: USAR emptyState (Estado Vazio/Zero) em caso de falha ***
+                dataToRender = emptyState;
+                allAtendimentos = []; // Garante que o array global esteja vazio
+                isDataLoadedSuccessfully = false;
+                errorMessage = errorMessage || `Erro ao processar o JSON. Detalhe: ${error.message}`;
+            }
+
+            // A renderização inicial usa todos os dados carregados ou o estado vazio.
+            renderDashboard(dataToRender);
+            // O setupEventListeners será chamado dentro de renderDashboard, mas podemos garantir aqui:
+            setupEventListeners(); 
+
+            // Exibir a mensagem de erro se os dados vazios foram usados (falha no carregamento)
+            if (!isDataLoadedSuccessfully) {
+                console.error(errorMessage);
+                // Exibe a mensagem solicitada pelo usuário no painel de KPIs
+                document.getElementById('kpi-cards-container').innerHTML = 
+                    `<div class="no-data-message">
+                        ❌ **NENHUM DADO ENCONTRADO** ❌<br>
+                        Não foi possível carregar o arquivo **${jsonFilePath}**. Verifique se ele está na pasta correta e se você está usando um Servidor Web Local.
+                    </div>`;
+            } else {
+                 console.log("Dashboard renderizado com sucesso a partir do JSON carregado.");
+            }
+        });
+
+
+                // -----------------------------------------------------
+        // --- MEDIDAS DE "SEGURANÇA POR OBSCURIDADE" ---
+        // -----------------------------------------------------
+
+        // Desabilita o menu de contexto (botão direito do mouse)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Desabilita as teclas F12, Ctrl+Shift+I e Ctrl+U
+        document.addEventListener('keydown', function(e) {
+            
+            // F12 check
+            const isF12 = e.key === 'F12' || e.keyCode === 123;
+            
+            // Ctrl+Shift+I check (I = 73)
+            const isCtrlShiftI = e.ctrlKey && e.shiftKey && (e.key === 'I' || e.keyCode === 73);
+            
+            // Ctrl+U check (U = 85)
+            const isCtrlU = e.ctrlKey && (e.key === 'U' || e.keyCode === 85);
+
+            if (isF12 || isCtrlShiftI || isCtrlU) {
+                e.preventDefault();
+            }
+        });
+
+        // -----------------------------------------------------
+        // --- FIM MEDIDAS DE "SEGURANÇA POR OBSCURIDADE" ---
+        // -----------------------------------------------------
+    </script>
+</body>
+</html>
