@@ -105,5 +105,69 @@
         <p>Este campo está passando por melhorias e estará disponível em breve.</p>
         <p><strong>Agradecemos sua compreensão!</strong></p>
     </div>
+    
+    <script>
+        // -----------------------------------------------------
+        // --- MEDIDAS DE "SEGURANÇA POR OBSCURIDADE" (MELHORADAS) ---
+        // -----------------------------------------------------
+
+        // Desabilita o menu de contexto (botão direito do mouse)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        
+        // Desabilita teclas comuns do DevTools e outras
+        document.addEventListener('keydown', function(e) {
+            // F12 check
+            const isF12 = e.key === 'F12' || e.keyCode === 123;
+            // Ctrl+Shift+I check (I = 73)
+            const isCtrlShiftI = e.ctrlKey && e.shiftKey && (e.key === 'I' || e.keyCode === 73);
+            // Ctrl+Shift+J check (J = 74)
+            const isCtrlShiftJ = e.ctrlKey && e.shiftKey && (e.key === 'J' || e.keyCode === 74);
+            // Ctrl+U check (U = 85) - Ver Código Fonte
+            const isCtrlU = e.ctrlKey && (e.key === 'U' || e.keyCode === 85);
+            // Ctrl+S check (S = 83) - Impede Salvar Página
+            const isCtrlS = e.ctrlKey && (e.key === 'S' || e.keyCode === 83);
+            // Ctrl+Shift+C check (C = 67) - Selecionar Elemento
+            const isCtrlShiftC = e.ctrlKey && e.shiftKey && (e.key === 'C' || e.keyCode === 67);
+
+            if (isF12 || isCtrlShiftI || isCtrlU || isCtrlShiftJ || isCtrlS || isCtrlShiftC) {
+                e.preventDefault();
+            }
+        });
+        
+        // Novo: Detecção Ativa de DevTools (console.log)
+        // Se o console estiver aberto, a função 'console.log' com um objeto demora muito mais a ser executada.
+        const devtoolsCheck = () => {
+            const threshold = 100; // Tempo limite em milissegundos
+            const loop = () => {
+                const start = performance.now();
+                // Tenta logar um objeto para forçar o DevTools a inspecionar, o que atrasa a execução se estiver aberto.
+                console.log('%c', 'display: none'); 
+                const end = performance.now();
+                
+                // Se a diferença de tempo for maior que o limite, o DevTools está aberto.
+                if (end - start > threshold) {
+                    // Bloqueio: Redireciona para uma página vazia ou fecha a janela
+                    document.body.innerHTML = '<h1>Acesso negado.</h1>';
+                    // window.close(); // Pode não funcionar na maioria dos navegadores
+                }
+                
+                // Executa a cada X milissegundos
+                setTimeout(loop, 500);
+            };
+            loop(); // Inicia o loop
+        };
+        // Tenta iniciar a checagem se o console estiver disponível
+        if (window.console && window.console.log) {
+            devtoolsCheck();
+        }
+
+        // Inicializa o conteúdo com o blur removido (já que os elementos sidebar e content já tinham a classe 'content-blurred' no HTML para evitar flash)
+        sidebar.classList.remove('content-blurred');
+        content.classList.remove('content-blurred');
+    </script>
+
 </body>
 </html>
