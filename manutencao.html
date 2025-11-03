@@ -105,7 +105,7 @@
         <p>Este campo está passando por melhorias e estará disponível em breve.</p>
         <p><strong>Agradecemos sua compreensão!</strong></p>
     </div>
-    
+
     <script>
         // -----------------------------------------------------
         // --- MEDIDAS DE "SEGURANÇA POR OBSCURIDADE" (MELHORADAS) ---
@@ -116,7 +116,6 @@
             e.preventDefault();
         });
 
-        
         // Desabilita teclas comuns do DevTools e outras
         document.addEventListener('keydown', function(e) {
             // F12 check
@@ -136,24 +135,24 @@
                 e.preventDefault();
             }
         });
-        
+
         // Novo: Detecção Ativa de DevTools (console.log)
-        // Se o console estiver aberto, a função 'console.log' com um objeto demora muito mais a ser executada.
         const devtoolsCheck = () => {
             const threshold = 100; // Tempo limite em milissegundos
             const loop = () => {
                 const start = performance.now();
                 // Tenta logar um objeto para forçar o DevTools a inspecionar, o que atrasa a execução se estiver aberto.
+                // Usando uma string vazia com estilo de display: none para minimizar o impacto visual no console
                 console.log('%c', 'display: none'); 
                 const end = performance.now();
-                
+
                 // Se a diferença de tempo for maior que o limite, o DevTools está aberto.
                 if (end - start > threshold) {
-                    // Bloqueio: Redireciona para uma página vazia ou fecha a janela
+                    // Bloqueio: Redireciona para uma página vazia ou informa o acesso negado
                     document.body.innerHTML = '<h1>Acesso negado.</h1>';
                     // window.close(); // Pode não funcionar na maioria dos navegadores
                 }
-                
+
                 // Executa a cada X milissegundos
                 setTimeout(loop, 500);
             };
@@ -164,9 +163,14 @@
             devtoolsCheck();
         }
 
-        // Inicializa o conteúdo com o blur removido (já que os elementos sidebar e content já tinham a classe 'content-blurred' no HTML para evitar flash)
-        sidebar.classList.remove('content-blurred');
-        content.classList.remove('content-blurred');
+        // A linha a seguir foi removida por não ser aplicável neste contexto, pois as variáveis 'sidebar' e 'content' não estavam definidas.
+        // if (typeof sidebar !== 'undefined') sidebar.classList.remove('content-blurred');
+        // if (typeof content !== 'undefined') content.classList.remove('content-blurred');
+
+
+        // -----------------------------------------------------
+        // --- FIM MEDIDAS DE "SEGURANÇA POR OBSCURIDADE" ---
+        // ------------------------------------------------------
     </script>
 
 </body>
