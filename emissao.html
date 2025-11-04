@@ -633,14 +633,14 @@
         const COLUNA_MAPA = [
             { novoTitulo: "STATUS", jsonIndex: 0, colunaId: 'status', filterable: true },
             { novoTitulo: "COLABORADOR", jsonIndex: 1, colunaId: 'colaborador', filterable: true },
-            { novoTitulo: "PLATAFORMA", jsonIndex: 2, colunaId: 'plataforma', filterable: true },
-            { novoTitulo: "N°SOLICITAÇÃO", jsonIndex: 3, colunaId: 'solicitacao', filterable: true },
-            { novoTitulo: "ASSUNTO", jsonIndex: 4, colunaId: 'assunto', filterable: true },
-            { novoTitulo: "DESCRIÇÃO", jsonIndex: 5, colunaId: 'descricao', filterable: true },
-            { novoTitulo: "CÉLULA", jsonIndex: 6, colunaId: 'celula', filterable: true },
-            { novoTitulo: "CAIXINHA", jsonIndex: 7, colunaId: 'caixinha', filterable: true },
+            { novoTitulo: "PLATAFORMA", jsonIndex: 2, colunaId: 'plataforma', filterable: false },
+            { novoTitulo: "N°SOLICITAÇÃO", jsonIndex: 3, colunaId: 'solicitacao', filterable: false },
+            { novoTitulo: "ASSUNTO", jsonIndex: 4, colunaId: 'assunto', filterable: false },
+            { novoTitulo: "DESCRIÇÃO", jsonIndex: 5, colunaId: 'descricao', filterable: false },
+            { novoTitulo: "CÉLULA", jsonIndex: 6, colunaId: 'celula', filterable: false },
+            { novoTitulo: "CAIXINHA", jsonIndex: 7, colunaId: 'caixinha', filterable: false },
             { novoTitulo: "PARADOS NO NOME", jsonIndex: 8, colunaId: 'parados', filterable: true },
-            { novoTitulo: "DATA PRAZO", jsonIndex: 9, colunaId: 'data_prazo', filterable: false },
+            { novoTitulo: "DATA PRAZO", jsonIndex: 9, colunaId: 'data_prazo', filterable: true },
             { novoTitulo: "SITUAÇÃO", jsonIndex: 10, colunaId: 'situacao', filterable: true },
             { novoTitulo: "OBSERVAÇÃO", jsonIndex: 11, colunaId: 'observacao', filterable: false }
         ];
@@ -1000,7 +1000,7 @@
                             colaborador: novoNome
                         });
 
-                        timerId = setTimeout(hideLoadingOverlay, 5000); // MODIFICADO PARA 5 SEGUNDOS
+                        timerId = setTimeout(hideLoadingOverlay, 7000); // MODIFICADO PARA 5 SEGUNDOS
 
                     } else if (result.error && result.error.toUpperCase().includes('CONFLITO')) {
 
@@ -1019,13 +1019,13 @@
 
                     } else {
                         // Outro erro de servidor (o alerta já foi disparado dentro de salvarDadosPlanilha)
-                        timerId = setTimeout(hideLoadingOverlay, 5000); // MODIFICADO PARA 5 SEGUNDOS
+                        timerId = setTimeout(hideLoadingOverlay, 7000); // MODIFICADO PARA 5 SEGUNDOS
                         iniciarPolling();
                     }
 
                 } catch (error) {
                     console.error("Erro fatal no salvamento do colaborador:", error);
-                    timerId = setTimeout(hideLoadingOverlay, 5000); // MODIFICADO PARA 5 SEGUNDOS
+                    timerId = setTimeout(hideLoadingOverlay, 7000); // MODIFICADO PARA 5 SEGUNDOS
                     iniciarPolling();
                 } finally {
                     // Reinicia o Polling, a menos que haja um conflito (que é tratado no okConflictBtn)
@@ -1122,7 +1122,7 @@
 
                     showLoadingOverlay();
                     await salvarDadosPlanilha(row); // Não é 'initial claim' aqui, é só salvamento
-                    setTimeout(hideLoadingOverlay, 5000); // MODIFICADO PARA 5 SEGUNDOS
+                    setTimeout(hideLoadingOverlay, 7000); // MODIFICADO PARA 5 SEGUNDOS
                     iniciarPolling(); // REINICIA O POLLING APÓS O SALVAMENTO
 
                 }
@@ -1142,7 +1142,7 @@
 
                 showLoadingOverlay();
                 await salvarDadosPlanilha(row);
-                setTimeout(hideLoadingOverlay, 5000); // MODIFICADO PARA 5 SEGUNDOS
+                setTimeout(hideLoadingOverlay, 7000); // MODIFICADO PARA 5 SEGUNDOS
                 iniciarPolling(); // REINICIA O POLLING APÓS O SALVAMENTO
 
 
@@ -1157,7 +1157,7 @@
 
                 showLoadingOverlay();
                 await salvarDadosPlanilha(row);
-                setTimeout(hideLoadingOverlay, 5000); // MODIFICADO PARA 5 SEGUNDOS
+                setTimeout(hideLoadingOverlay, 7000); // MODIFICADO PARA 5 SEGUNDOS
                 iniciarPolling(); // REINICIA O POLLING APÓS O SALVAMENTO
             }
 
@@ -1301,8 +1301,29 @@
 
                     COLUNA_MAPA.forEach((colMap) => {
                         const cellData = row.c[colMap.jsonIndex];
-                        const rawCellValue = cellData && cellData.v !== undefined ? String(cellData.v) : '';
-                        const cellValue = rawCellValue.toUpperCase() === 'NULL' ? '' : rawCellValue;
+                        let cellValue;
+
+                        // CORREÇÃO: Tratamento especial para 'DATA PRAZO' (data_prazo)
+                        if (colMap.colunaId === 'data_prazo' && cellData && cellData.v && typeof cellData.v === 'string' && cellData.v.startsWith('Date(')) {
+                            // Exemplo: Date(2025,9,20) -> Mês 9 é Outubro (base 0)
+                            const dateMatch = cellData.v.match(/Date\((\d{4}),(\d{1,2}),(\d{1,2})\)/);
+                            if (dateMatch) {
+                                // Mês retornado é base 0, mas para o Gviz, o valor do mês é base 0.
+                                // Ex: Date(2025,9,20) é 20 de Outubro de 2025.
+                                const ano = dateMatch[1];
+                                const mes = parseInt(dateMatch[2]) + 1; // Soma 1 para o mês ficar correto
+                                const dia = dateMatch[3];
+
+                                cellValue = `${dia.padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
+                            } else {
+                                cellValue = '';
+                            }
+                        } else {
+                            // Lógica original para outras colunas
+                            const rawCellValue = cellData && cellData.v !== undefined ? String(cellData.v) : '';
+                            cellValue = rawCellValue.toUpperCase() === 'NULL' ? '' : rawCellValue;
+                        }
+                        // FIM CORREÇÃO
 
                         rowData.cells.push({
                             columnId: colMap.colunaId,
@@ -1806,8 +1827,16 @@
         }
 
         // Inicializa o conteúdo com o blur removido (já que os elementos sidebar e content já tinham a classe 'content-blurred' no HTML para evitar flash)
-        sidebar.classList.remove('content-blurred');
-        content.classList.remove('content-blurred');
+        const sidebar = document.getElementById('sidebar'); // Você precisa ter certeza que esses elementos existem no seu HTML
+        const content = document.getElementById('content'); // Você precisa ter certeza que esses elementos existem no seu HTML
+
+        if (sidebar && content) {
+            sidebar.classList.remove('content-blurred');
+            content.classList.remove('content-blurred');
+        } else {
+            // Lógica alternativa se sidebar/content não existirem (apenas para garantir a inicialização correta)
+            document.body.classList.remove('content-blurred');
+        }
 
 
     </script>
