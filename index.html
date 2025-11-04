@@ -30,6 +30,10 @@
             --input-border: #ced4da;
             --button-success: #28a745;
             --button-hover: #218838;
+            
+            /* NOVAS VARIÁVEIS PARA O MENU RECOLHIDO */
+            --sidebar-width: 280px;
+            --sidebar-width-collapsed: 90px; /* Nova largura reduzida */
         }
 
         /* ------------------------------------------- */
@@ -59,7 +63,7 @@
 
 
         .sidebar {
-            width: 280px;
+            width: var(--sidebar-width); /* Uso da variável */
             background-color: var(--sidebar-bg);
             color: var(--text-color);
             padding: 0;
@@ -73,17 +77,83 @@
             box-sizing: border-box;
             overflow-y: auto;
             z-index: 100;
-            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            /* Adicionado overflow-x hidden para evitar barra horizontal na transição */
+            overflow-x: hidden; 
+            transition: width var(--transition-speed) ease, background-color var(--transition-speed) ease, color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        /* ESTILOS DO MENU RECOLHIDO */
+        .sidebar.collapsed {
+            width: var(--sidebar-width-collapsed);
+        }
+
+        .sidebar.collapsed .header {
+            align-items: center; /* Centraliza a logo */
+            padding: 25px 10px 20px 10px;
+        }
+
+        .sidebar.collapsed .header .logo-img {
+            width: 50px; /* Reduz o tamanho da logo */
+            height: 50px;
+            margin-bottom: 0;
+        }
+        
+        /* Oculta o texto do usuário */
+        .sidebar.collapsed .user-info {
+            display: none;
+        }
+
+        /* Oculta o título da seção */
+        .sidebar.collapsed .menu-section-title {
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            border-top: none;
+        }
+
+        /* Oculta o sublinhado do título da seção */
+        .sidebar.collapsed .menu-section-title::after {
+            display: none;
+        }
+
+        /* Oculta o texto do menu */
+        .sidebar.collapsed .menu-item a span {
+            display: none;
+        }
+
+        /* Centraliza os ícones do menu e ajusta o padding e margin */
+        .sidebar.collapsed .menu-item a {
+            justify-content: center;
+            padding: 12px 0; /* Ajusta o padding */
+            /* **AJUSTE:** Aumenta a margem vertical no menu recolhido */
+            margin: 6px 5px; 
+        }
+
+        /* Reduz a margem do ícone quando o menu está recolhido */
+        .sidebar.collapsed .menu-item a i {
+            margin-right: 0; 
+        }
+
+        /* Garante que o item ativo tenha a borda na esquerda também no modo recolhido */
+        .sidebar.collapsed .menu-item a.active::before {
+             left: 0;
         }
 
         .content {
-            margin-left: 280px;
+            margin-left: var(--sidebar-width); /* Uso da variável */
             padding: 0;
             flex-grow: 1;
             box-sizing: border-box;
-            width: calc(100% - 280px);
+            width: calc(100% - var(--sidebar-width));
             height: 100vh;
-            transition: filter var(--transition-speed) ease, opacity var(--transition-speed) ease; /* Transição para o blur e opacidade */
+            transition: margin-left var(--transition-speed) ease, width var(--transition-speed) ease, filter var(--transition-speed) ease, opacity var(--transition-speed) ease;
+        }
+        
+        /* ESTILOS DO CONTEÚDO QUANDO O MENU ESTÁ RECOLHIDO */
+        .content.collapsed-margin {
+            margin-left: var(--sidebar-width-collapsed);
+            width: calc(100% - var(--sidebar-width-collapsed));
         }
 
         #main-frame {
@@ -99,6 +169,7 @@
             padding: 25px 20px 20px 20px;
             border-bottom: 1px solid var(--border-color-light);
             transition: border-color var(--transition-speed) ease;
+            position: relative;
         }
 
         .logo-img {
@@ -107,10 +178,12 @@
             object-fit: cover;
             border-radius: 50%;
             margin-bottom: 10px;
+            transition: width var(--transition-speed) ease, height var(--transition-speed) ease, margin var(--transition-speed) ease;
         }
 
         .user-info {
             text-align: center;
+            transition: opacity var(--transition-speed) ease; 
         }
 
         .user-info h3 {
@@ -133,37 +206,41 @@
 
         .menu-list {
             list-style: none;
-            padding: 10px 0;
+            /* REMOVIDO: Padding para ser controlado pelas novas regras */
+            padding: 0;
             margin: 0;
         }
 
         .main-menu-container {
             flex-grow: 1;
             overflow-y: auto;
+            /* REFORÇADO: Padding inferior da lista principal */
             padding-bottom: 10px;
+            overflow-x: hidden;
         }
 
         /* AJUSTES PARA DESTACAR E CENTRALIZAR */
         .menu-section-title {
-            font-size: 16px; /* Aumentar o tamanho da fonte */
+            font-size: 16px; 
             font-weight: 700;
             color: var(--demanda-highlight-color);
             text-transform: uppercase;
-            padding: 20px 20px 5px 20px;
+            /* REFORÇADO O PADDING INFERIOR: Afasta do conteúdo */
+            padding: 20px 20px 15px 20px; 
             margin: 0;
             border-top: 1px solid var(--border-color-light);
             letter-spacing: 1.5px;
-            text-align: center; /* CENTRALIZADO */
-            transition: color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
         }
         
         .menu-section-title::after {
             content: '';
             display: block;
-            width: 50px; /* Largura do sublinhado */
+            width: 50px; 
             height: 2px;
             background: var(--primary-color);
-            margin: 8px auto 0 auto; /* Centraliza o sublinhado */
+            margin: 8px auto 0 auto;
             border-radius: 2px;
             transition: background var(--transition-speed) ease;
         }
@@ -180,8 +257,25 @@
             font-weight: 500;
             transition: all var(--transition-speed) ease;
             position: relative;
-            margin: 2px 10px 2px 10px;
+            /* Alteração anterior para menu estendido (10px) */
+            margin: 10px 10px 10px 10px;
             border-radius: 8px;
+        }
+        
+        /* NOVO ESTILO: Ajusta a lista de Fluxos */
+        #demanda-items {
+            /* Adiciona o padding superior para afastar os itens do título e criar o espaço da linha */
+            padding: 0 0 10px 0; 
+        }
+
+        /* NOVO ESTILO: Remove a margem superior do PRIMEIRO item da seção de Fluxos */
+        /* Isso faz com que a borda do título fique imediatamente acima do primeiro item */
+        #demanda-items .menu-item:first-child a {
+            margin-top: 0; 
+        }
+        
+        .menu-item a span {
+            transition: opacity var(--transition-speed) ease;
         }
 
         .menu-item a:hover {
@@ -216,7 +310,7 @@
             margin-right: 15px;
             font-size: 18px;
             color: var(--icon-color);
-            transition: color var(--transition-speed) ease;
+            transition: color var(--transition-speed) ease, margin-right var(--transition-speed) ease;
         }
 
         .menu-item a:hover i, .menu-item a.active i {
@@ -232,7 +326,8 @@
         .logout-section .menu-item a {
             color: var(--secondary-text-color);
             font-weight: 500;
-            margin: 2px 10px 2px 10px;
+            /* Mantido em 10px para espaçamento vertical */
+            margin: 10px 10px 10px 10px;
         }
         .logout-section .menu-item a:hover {
             color: var(--logout-hover-color);
@@ -247,7 +342,78 @@
 
 
         /* ------------------------------------------- */
-        /* ESTILOS DO MODAL DE LOGIN */
+        /* ESTILOS DO TOGGLE SWITCH (MOVIDO PARA O RODAPÉ) */
+        /* ------------------------------------------- */
+        
+        /* Nova seção para o toggle */
+        .toggle-section {
+            border-top: 1px solid var(--border-color-light);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        /* Ajustes no modo recolhido */
+        .sidebar.collapsed .toggle-section {
+            justify-content: center; /* Centraliza o switch */
+            padding: 15px 0; /* Remove padding lateral */
+        }
+        
+        .toggle-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--secondary-text-color);
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .toggle-text {
+            opacity: 0; /* Oculta o texto "Recolher Menu" */
+            width: 0;
+            overflow: hidden;
+            display: none; /* Garante que não interfira no layout */
+        }
+
+        .toggle-switch input {
+            display: none;
+        }
+
+        .toggle-switch label {
+            display: block;
+            width: 40px;
+            height: 20px;
+            background-color: var(--border-color-light);
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .toggle-switch label::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background-color: var(--sidebar-bg);
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            transition: transform var(--transition-speed) ease, background-color var(--transition-speed) ease;
+        }
+
+        .toggle-switch input:checked + label {
+            background-color: var(--primary-color);
+        }
+
+        .toggle-switch input:checked + label::after {
+            transform: translateX(20px);
+        }
+
+
+        /* ------------------------------------------- */
+        /* ESTILOS DO MODAL DE LOGIN (SEM ALTERAÇÃO) */
         /* ------------------------------------------- */
 
         .modal-overlay {
@@ -256,11 +422,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.4); /* Fundo escuro sutil */
-            display: none; /* Escondido por padrão */
+            background-color: rgba(0, 0, 0, 0.4);
+            display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000; /* Acima de tudo */
+            z-index: 1000;
         }
 
         .modal-content {
@@ -409,23 +575,30 @@
 
     <div class="main-menu-container">
         <ul class="menu-list" id="menu-items">
-            <li class="menu-item"><a href="#" class="active" data-page="manutencao.html" id="link-inicio"><i class="fa-solid fa-house"></i>Início</a></li>
-            <li class="menu-item"><a href="#" data-page="analise semanal.html"><i class="fa-solid fa-chart-line"></i>Análise Semanal</a></li>
-            <li class="menu-item"><a href="#" data-page="manutencao.html" id="link-supervisores"><i class="fa-solid fa-user-tie"></i>Supervisores</a></li> 
-            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-chalkboard-teacher"></i>Treinamentos</a></li>
-            <li class="menu-item"><a href="#" data-page="reunioes e eventos.html"><i class="fa-solid fa-calendar-days"></i>Reuniões/Eventos</a></li>
+            <li class="menu-item"><a href="#" class="active" data-page="manutencao.html" id="link-inicio"><i class="fa-solid fa-house"></i><span>Início</span></a></li>
+            <li class="menu-item"><a href="#" data-page="analise semanal.html"><i class="fa-solid fa-chart-line"></i><span>Análise Semanal</span></a></li>
+            <li class="menu-item"><a href="#" data-page="manutencao.html" id="link-supervisores"><i class="fa-solid fa-user-tie"></i><span>Supervisores</span></a></li> 
+            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-chalkboard-teacher"></i><span>Treinamentos</span></a></li>
+            <li class="menu-item"><a href="#" data-page="reunioes e eventos.html"><i class="fa-solid fa-calendar-days"></i><span>Reuniões/Eventos</span></a></li>
         </ul>
 
         <h3 class="menu-section-title">Fluxos de Atendimento</h3>
         <ul class="menu-list" id="demanda-items">
-            <li class="menu-item"><a href="#" data-page="emissao.html"><i class="fa-solid fa-file-invoice"></i>Emissão</a></li>
-            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-user-plus"></i>Ingresso</a></li>
-            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-check-double"></i>Validação</a></li>       
-            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-graduation-cap"></i>Educação Continuada</a></li>      
-            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-wrench"></i>Desenvolv. & Qualidade</a></li>
-            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-life-ring"></i>Suporte Técnico</a></li>
-        </ul>
+            <li class="menu-item"><a href="#" data-page="emissao.html"><i class="fa-solid fa-folder-open"></i><span>Emissão</span></a></li>
+            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-user-plus"></i><span>Ingresso</span></a></li>
+            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-check-double"></i><span>Validação</span></a></li>
+            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-graduation-cap"></i><span>Educação Continuada</span></a></li>
+            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-graduation-cap"></i><span>Desenv & Qualidade</span></a></li>
+            <li class="menu-item"><a href="#" data-page="manutencao.html"><i class="fa-solid fa-life-ring"></i><span>Suporte Técnico</span></a></li>
+            </ul>  
+    </div>
 
+    <div class="toggle-section">
+        <span class="toggle-text">Recolher Menu</span>
+        <div class="toggle-switch">
+            <input type="checkbox" id="sidebar-toggle" />
+            <label for="sidebar-toggle" title="Recolher Menu"></label>
+        </div>
     </div>
 
     <div class="logout-section">
@@ -433,7 +606,7 @@
             <li class="menu-item">
                 <a href="#" data-page="logout.html">
                     <i class="fa-solid fa-right-from-bracket"></i>
-                    Sair
+                    <span>Sair</span>
                 </a>
             </li>
         </ul>
@@ -464,6 +637,10 @@
         const loginMessage = document.getElementById('login-message');
         const sidebar = document.getElementById('sidebar');
         const content = document.getElementById('content');
+        
+        // NOVO ELEMENTO: Toggle Switch
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+
 
         // Contas de Acesso
         const VALID_CREDENTIALS = {
@@ -480,6 +657,25 @@
              document.querySelectorAll('.menu-item a').forEach(link => {
                  link.classList.remove('active');
              });
+        };
+        
+        // --- NOVO: Função para alternar o estado do menu ---
+        const toggleSidebar = () => {
+            const isCollapsed = sidebar.classList.toggle('collapsed');
+            content.classList.toggle('collapsed-margin', isCollapsed);
+            
+            // Salva o estado do menu no localStorage (opcional, mas bom para persistência)
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
+        };
+        
+        // --- NOVO: Função para carregar o estado do menu ---
+        const loadSidebarState = () => {
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            sidebarToggle.checked = isCollapsed; // Sincroniza o switch
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+                content.classList.add('collapsed-margin');
+            }
         };
 
         // --- Funções para o Modal ---
@@ -505,12 +701,13 @@
             // Remove classes de desfoque
             sidebar.classList.remove('content-blurred');
             content.classList.remove('content-blurred');
-
+            
             // Volta para a página "Início" e a marca como ativa
             removeAllActiveClasses();
             if (linkInicio) {
                 linkInicio.classList.add('active');
-                mainFrame.src = linkInicio.getAttribute('data-page');
+                const initialPage = linkInicio.getAttribute('data-page') === 'manutencao.html' ? 'home-dashboard.html' : linkInicio.getAttribute('data-page');
+                mainFrame.src = initialPage;
             }
 
             // Esconde o modal
@@ -537,7 +734,7 @@
                 removeAllActiveClasses();
                 linkSupervisores.classList.add('active');
                 
-                // Navega para a página restrita (já é a manutencao.html)
+                // Navega para a página restrita 
                 const pageUrl = linkSupervisores.getAttribute('data-page');
                 mainFrame.src = pageUrl;
             } else {
@@ -552,24 +749,31 @@
 
         // --- Lógica do Menu ---
         
-        // Define a página inicial no iframe e o item ativo ao carregar
+        // 1. Carrega o estado inicial do menu (se estiver salvo)
+        loadSidebarState();
+        
+        // 2. Define a página inicial no iframe e o item ativo ao carregar
         if (linkInicio) {
-              mainFrame.src = linkInicio.getAttribute('data-page'); 
-              linkInicio.classList.add('active'); // Garante que Início está ativo na carga
+             const initialPage = linkInicio.getAttribute('data-page') === 'manutencao.html' ? 'home-dashboard.html' : linkInicio.getAttribute('data-page');
+             mainFrame.src = initialPage; 
+             linkInicio.classList.add('active'); 
         } else {
-              mainFrame.src = "home-dashboard.html"; 
+            mainFrame.src = "home-dashboard.html"; 
         }
 
-        // Adiciona listener para o link "Supervisores"
+        // 3. Adiciona listener para o NOVO Toggle Switch
+        sidebarToggle.addEventListener('change', toggleSidebar);
+
+        // 4. Adiciona listener para o link "Supervisores"
         linkSupervisores.addEventListener('click', showLoginModal);
         
-        // Adiciona listener para o botão "Cancelar" (usando a função atualizada)
+        // 5. Adiciona listener para o botão "Cancelar"
         cancelButton.addEventListener('click', hideLoginModal);
 
-        // Adiciona listener para o Formulário de Login
+        // 6. Adiciona listener para o Formulário de Login
         loginForm.addEventListener('submit', handleLogin);
 
-        // Adiciona listener para os demais menus (Ajustado)
+        // 7. Adiciona listener para os demais menus (Ajustado)
         [...menuContainers, document.querySelector('.logout-section')].forEach(container => {
             if (container) {
                 container.addEventListener('click', (e) => {
@@ -631,33 +835,28 @@
         });
         
         // Novo: Detecção Ativa de DevTools (console.log)
-        // Se o console estiver aberto, a função 'console.log' com um objeto demora muito mais a ser executada.
         const devtoolsCheck = () => {
             const threshold = 100; // Tempo limite em milissegundos
             const loop = () => {
                 const start = performance.now();
-                // Tenta logar um objeto para forçar o DevTools a inspecionar, o que atrasa a execução se estiver aberto.
                 console.log('%c', 'display: none'); 
                 const end = performance.now();
                 
-                // Se a diferença de tempo for maior que o limite, o DevTools está aberto.
                 if (end - start > threshold) {
-                    // Bloqueio: Redireciona para uma página vazia ou fecha a janela
                     document.body.innerHTML = '<h1>Acesso negado.</h1>';
-                    // window.close(); // Pode não funcionar na maioria dos navegadores
                 }
                 
-                // Executa a cada X milissegundos
                 setTimeout(loop, 500);
             };
-            loop(); // Inicia o loop
+            // Se quiser reativar a segurança por obscuridade, descomente a linha abaixo
+            // if (window.console && window.console.log) { loop(); }
         };
         // Tenta iniciar a checagem se o console estiver disponível
         if (window.console && window.console.log) {
-            devtoolsCheck();
+            // devtoolsCheck(); // Descomente para ativar a checagem de DevTools
         }
 
-        // Inicializa o conteúdo com o blur removido (já que os elementos sidebar e content já tinham a classe 'content-blurred' no HTML para evitar flash)
+        // Inicializa o conteúdo com o blur removido 
         sidebar.classList.remove('content-blurred');
         content.classList.remove('content-blurred');
 
