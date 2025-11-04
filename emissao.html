@@ -807,6 +807,20 @@
                 isInitialClaim: isInitialClaim
             };
 
+            // --- NOVA LÓGICA DE CONTROLE DE TEMPO (START e END TIME) ---
+            // Esta lógica adiciona campos para o App Script registrar o tempo na Coluna M (START) ou N (END).
+            if (isInitialClaim && statusValue.toUpperCase() === 'EM ANDAMENTO') {
+                // Ação: Início do Atendimento (Start Time na coluna M)
+                dataToSave.timestampAction = 'START';
+                dataToSave.timestampValue = new Date().toISOString();
+            } else if (!isInitialClaim && statusValue.toUpperCase() === 'CONCLUÍDO') {
+                // Ação: Fim do Atendimento (End Time na coluna N)
+                dataToSave.timestampAction = 'END';
+                dataToSave.timestampValue = new Date().toISOString();
+            }
+            // --- FIM NOVA LÓGICA DE CONTROLE DE TEMPO ---
+
+
             pararPolling();
 
             try {
