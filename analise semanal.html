@@ -16,8 +16,9 @@
             --cor-texto-principal: #212529; 
             --cor-texto-secundario: #6c757d; 
             --cor-total: #1e3a5f;
-            --cor-prazo: #20c997;       /* Verde água (No Prazo) */
-            --cor-fora-prazo: #fd7e14;  /* Laranja (Fora do Prazo / Alerta) */
+            --cor-prazo: #20c997;       /* Verde água (No Prazo / A Vencer) */
+            --cor-vence-hoje: #ffc107;  /* Amarelo (Vence Hoje / Alerta) */ 
+            --cor-fora-prazo: #dc3545;  /* Vermelho (Fora do Prazo / Crítico) */ 
             --cor-sem-sla: #0dcaf0;     /* Ciano (Sem SLA) */
             --sombra-suave: 0 10px 30px rgba(0, 0, 0, 0.05); 
             --sombra-kpi: 0 4px 12px rgba(0, 0, 0, 0.04);
@@ -25,7 +26,7 @@
             
             /* CORES PARA A BARRA EMPILHADA DE FLUXO (NM_AREA_SERV) */
             --fluxo-atrasado: #dc3545; /* Vermelho (Crítico) */
-            --fluxo-vence-hoje: #fd7e14; /* Laranja (Alerta) */
+            --fluxo-vence-hoje: #ffc107; /* Amarelo (Vence Hoje) */ 
             --fluxo-sem-sla: #0dcaf0; /* Azul Ciano (Informativo) */
             --fluxo-a-vencer: #20c997; /* Verde (Saúde) */
 
@@ -91,7 +92,8 @@
         /* --- 1. Cartões de KPIs --- */
         .kpi-cards {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            /* AJUSTADO: Agora com 5 colunas para acomodar todos os cartões */
+            grid-template-columns: repeat(5, 1fr); 
             gap: 30px;
         }
 
@@ -135,8 +137,9 @@
         }
         
         .kpi-card[data-kpi="total"] .icon-container { color: var(--cor-total); border: 1px solid var(--cor-total); }
-        .kpi-card[data-kpi="prazo"] .icon-container { color: var(--cor-prazo); border: 1px solid var(--cor-prazo); }
-        .kpi-card[data-kpi="fora-prazo"] .icon-container { color: var(--cor-fora-prazo); border: 1px solid var(--cor-fora-prazo); }
+        .kpi-card[data-kpi="prazo"] .icon-container { color: var(--cor-prazo); border: 1px solid var(--cor-prazo); } /* A Vencer */
+        .kpi-card[data-kpi="vence-hoje"] .icon-container { color: var(--cor-vence-hoje); border: 1px solid var(--cor-vence-hoje); } /* NOVO */
+        .kpi-card[data-kpi="fora-prazo"] .icon-container { color: var(--cor-fora-prazo); border: 1px solid var(--cor-fora-prazo); } /* Atrasado */
         .kpi-card[data-kpi="sem-sla"] .icon-container { color: var(--cor-sem-sla); border: 1px solid var(--cor-sem-sla); }
 
         .kpi-value {
@@ -148,6 +151,7 @@
 
         .kpi-card[data-kpi="total"] .kpi-value { color: var(--cor-total); }
         .kpi-card[data-kpi="prazo"] .kpi-value { color: var(--cor-prazo); }
+        .kpi-card[data-kpi="vence-hoje"] .kpi-value { color: var(--cor-vence-hoje); } /* NOVO */
         .kpi-card[data-kpi="fora-prazo"] .kpi-value { color: var(--cor-fora-prazo); }
         .kpi-card[data-kpi="sem-sla"] .kpi-value { color: var(--cor-sem-sla); }
 
@@ -324,7 +328,7 @@
 
         /* NOVO: Estilo para mensagem de erro de dados vazios */
         .no-data-message {
-            grid-column: 1 / span 4; 
+            grid-column: 1 / span 5; /* AJUSTADO: span 5 para cobrir toda a linha de 5 colunas */
             color: var(--fluxo-atrasado); 
             padding: 30px; 
             text-align: center; 
@@ -360,11 +364,18 @@
                 </div>
                 <div class="kpi-value" id="kpi-prazo">...</div>
             </div>
-
+            
+            <div class="kpi-card" data-kpi="vence-hoje" data-filter-col="STATUS_FILTRO_KPI" data-filter-val="VENCE_HOJE">
+                <div class="card-header">
+                    <span class="kpi-label">Vence Hoje</span>
+                    <span class="icon-container">⚠️</span>
+                </div>
+                <div class="kpi-value" id="kpi-vence-hoje">...</div>
+            </div>
             <div class="kpi-card" data-kpi="fora-prazo" data-filter-col="STATUS_FILTRO_KPI" data-filter-val="ATRASADO">
                 <div class="card-header">
                     <span class="kpi-label">Fora do Prazo</span>
-                    <span class="icon-container">⚠️</span>
+                    <span class="icon-container">❌</span>
                 </div>
                 <div class="kpi-value" id="kpi-fora-prazo">...</div>
             </div>
@@ -376,7 +387,7 @@
                 </div>
                 <div class="kpi-value" id="kpi-sem-sla">...</div>
             </div>
-        </div>
+            </div>
 
         <div class="chart-row chart-row-1">
 
@@ -458,7 +469,7 @@
 
         // Estado inicial de dados vazios para fallback
         const emptyState = {
-            kpis: { total: 0, prazo: 0, fora_prazo: 0, sem_sla: 0 },
+            kpis: { total: 0, prazo: 0, vence_hoje: 0, fora_prazo: 0, sem_sla: 0 }, // AJUSTE: Adicionado 'vence_hoje'
             celulas: [],
             status_prazo: [],
             sistemas: [],
@@ -513,7 +524,7 @@
          * Mapeia o NM_STATUS_PRAZO_AND para uma chave simples.
          * É usada em processarDadosDoArray e na lógica de filtro.
          * @param {string} statusPrazo - O valor do campo NM_STATUS_PRAZO_AND
-         * @returns {string} - A chave simplificada ('ATRASADO', 'VENCE HOJE', 'A_VENCER', 'SEM_SLA')
+         * @returns {string} - A chave simplificada ('ATRASADO', 'VENCE HOJE', 'A_VENCER', 'SEM SLA')
          */
         function mapStatusToKey(statusPrazo) {
              const status = (statusPrazo || "Não tem SLA").trim();
@@ -521,7 +532,7 @@
              if (status === '1. Atrasado') {
                  return 'ATRASADO';
              } else if (status === '2. Vence hoje') {
-                 return 'VENCE HOJE';
+                 return 'VENCE HOJE'; 
              } else if (status === 'Não tem SLA') {
                  return 'SEM SLA';
              } 
@@ -548,8 +559,7 @@
                 const entry = fluxosMap.get(area);
                 entry.total++;
                 // O status simplificado pode ser 'ATRASADO', 'VENCE HOJE', 'SEM SLA' ou 'A VENCER'
-                // O status 'A VENCER' (no plural) no counts é o que inclui os vencimentos futuros
-                entry.statusCounts[statusSimplificado === 'A VENCER' ? 'A VENCER' : statusSimplificado]++;
+                entry.statusCounts[statusSimplificado]++; 
             });
 
             let fluxos = Array.from(fluxosMap.entries())
@@ -563,7 +573,7 @@
          * Calcula o Dia de Pico de Atendimentos com base na DT_PRAZO
          */
         function getDiaDePico(dataArray) {
-            // ... (implementação original, sem mudanças)
+            // ... (implementação original)
             if (!dataArray || dataArray.length === 0) {
                 return { pico: 0, data: "N/D" };
             }
@@ -606,7 +616,7 @@
          * Agrupa atendimentos por DT_PRAZO, filtra para os próximos 7 dias e formata para Chart.js.
          */
         function calcularProjecao7Dias(dataArray) {
-            // ... (implementação original, sem mudanças)
+            // ... (implementação original)
              const contagemPorDia = dataArray.reduce((acc, item) => {
                 const dataPrazo = item.DT_PRAZO ? String(item.DT_PRAZO).substring(0, 10) : null;
                 if (dataPrazo) {
@@ -642,6 +652,7 @@
 
         /**
          * Analisa o array de atendimentos e calcula KPIs e Distribuições.
+         * AJUSTADO PARA O NOVO KPI 'VENCE HOJE'.
          */
         function processarDadosDoArray(atendimentos) {
             if (!Array.isArray(atendimentos) || atendimentos.length === 0) {
@@ -650,48 +661,43 @@
             }
 
             let total = atendimentos.length;
-            let noPrazo = 0;    // Passa a contar "A VENCER" e "VENCE HOJE"
-            let foraPrazo = 0; // Passa a contar SOMENTE "ATRASADO"
-            let semSla = 0;    // Passa a contar "Não tem SLA"
+            let aVencer = 0;   // 3. Vence em 1 dia, 4. Vence em 2 dias, etc.
+            let venceHoje = 0; // 2. Vence hoje
+            let atrasado = 0;  // 1. Atrasado
+            let semSla = 0;    // Não tem SLA
+            let naoMapeado = 0; // Para itens com status desconhecido/não mapeado
 
             atendimentos.forEach(item => {
                 const statusPrazo = (item.NM_STATUS_PRAZO_AND || "Não tem SLA").trim();
                 
-                // 1. Sem Acordo SLA
                 if (statusPrazo === 'Não tem SLA') {
                     semSla++;
-                } 
-                // 2. Atrasado (Mapeado para Fora do Prazo - alerta)
-                else if (statusPrazo === '1. Atrasado') {
-                    foraPrazo++;
-                }
-                // 3. A Vencer e Vence Hoje (Mapeado para No Prazo)
-                else if (statusPrazo === '2. Vence hoje' || 
-                         statusPrazo.startsWith('3. Vence') || 
+                } else if (statusPrazo === '1. Atrasado') {
+                    atrasado++;
+                } else if (statusPrazo === '2. Vence hoje') {
+                    venceHoje++; // NOVO CÁLCULO
+                } else if (statusPrazo.startsWith('3. Vence') || 
                          statusPrazo.startsWith('4. Vence') || 
                          statusPrazo.startsWith('5. Vence') || 
                          statusPrazo.startsWith('6. Vence') || 
                          statusPrazo.startsWith('7. Vence') || 
                          statusPrazo === '8. Vencimentos posteriores') {
-                    noPrazo++;
+                    aVencer++;
+                } else {
+                    naoMapeado++;
                 }
-                // Se cair aqui, o status é desconhecido ou não mapeado. Não é contado em nenhum KPI explícito.
             });
             
             let kpis = {
                 total: total,
-                // noPrazo agora conta a soma dos status A Vencer (2. a 8.)
-                prazo: noPrazo,
-                // foraPrazo agora conta SOMENTE Atrasado (1.)
-                fora_prazo: foraPrazo,
-                // semSla agora conta "Não tem SLA"
-                sem_sla: semSla
+                prazo: aVencer,         // 'A Vencer' (futuro)
+                vence_hoje: venceHoje,  // 'Vence Hoje'
+                fora_prazo: atrasado,   // 'Fora do Prazo' (atrasado)
+                sem_sla: semSla + naoMapeado // Soma o 'Sem SLA' explícito e o 'Não Mapeado'
             };
             
-            // Reajusta o sem_sla para contabilizar quaisquer itens não classificados, garantindo a soma total.
-            // Esta lógica garante que os itens não mapeados acima (se houver) vão para Sem SLA
-            kpis.sem_sla = total - kpis.prazo - kpis.fora_prazo;
-
+            // Reajusta a contagem de 'sem_sla' para garantir a soma total.
+            kpis.sem_sla = total - kpis.prazo - kpis.vence_hoje - kpis.fora_prazo; 
 
             const celulas = calcularFrequencia(atendimentos, 'NM_CELULA');
             const status_prazo = calcularFrequencia(atendimentos, 'NM_STATUS_PRAZO_AND');
@@ -716,7 +722,7 @@
          * Renderiza o gráfico de linha de projeção (7 Dias) usando Chart.js
          */
         function renderProjecaoChart(chartData) {
-            // ... (implementação original, sem mudanças)
+            // ... (implementação original)
             const ctx = document.getElementById('lineChartProjecao').getContext('2d');
             
             if (window.lineChartInstance) {
@@ -845,7 +851,9 @@
                 filteredAtendimentos = allAtendimentos.filter(item => {
                     const mappedStatus = mapStatusToKey(item.NM_STATUS_PRAZO_AND);
                     if (value === 'A_VENCER') {
-                         return mappedStatus === 'A VENCER' || mappedStatus === 'VENCE HOJE';
+                         return mappedStatus === 'A VENCER';
+                    } else if (value === 'VENCE_HOJE') { 
+                         return mappedStatus === 'VENCE HOJE';
                     } else if (value === 'ATRASADO') {
                         return mappedStatus === 'ATRASADO';
                     } else if (value === 'SEM_SLA') {
@@ -960,8 +968,11 @@
             // 1. Renderizar KPIs
             document.getElementById('kpi-total').textContent = formatNumber(kpis.total || 0);
             document.getElementById('kpi-prazo').textContent = formatNumber(kpis.prazo || 0);
+            document.getElementById('kpi-vence-hoje').textContent = formatNumber(kpis.vence_hoje || 0); 
             document.getElementById('kpi-fora-prazo').textContent = formatNumber(kpis.fora_prazo || 0);
-            document.getElementById('kpi-sem-sla').textContent = formatNumber(kpis.sem_sla || 0);
+            // RESTAURADO: Atualiza o cartão 'Sem SLA'
+            document.getElementById('kpi-sem-sla').textContent = formatNumber(kpis.sem_sla || 0); 
+
             
             const totalAtendimentos = kpis.total || 1;
 
@@ -997,6 +1008,7 @@
                     const totalFluxo = item.valor;
                     const counts = item.statusCounts;
                     
+                    // AJUSTE: A ordem deve ser ATRAZADO > VENCE HOJE > A VENCER > SEM SLA
                     const statusOrder = ['ATRASADO', 'VENCE HOJE', 'A VENCER', 'SEM SLA'];
                     let segmentsHTML = '';
                     
