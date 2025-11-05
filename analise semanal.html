@@ -151,7 +151,7 @@
 
         .kpi-card[data-kpi="total"] .kpi-value { color: var(--cor-total); }
         .kpi-card[data-kpi="prazo"] .kpi-value { color: var(--cor-prazo); }
-        .kpi-card[data-kpi="vence-hoje"] .kpi-value { color: var(--cor-vence-hoje); } /* NOVO */
+        .kpi-card[data-kpi="vence-hoje"] .kpi-value { color: var(--cor-vence-hoje); }
         .kpi-card[data-kpi="fora-prazo"] .kpi-value { color: var(--cor-fora-prazo); }
         .kpi-card[data-kpi="sem-sla"] .kpi-value { color: var(--cor-sem-sla); }
 
@@ -465,6 +465,7 @@
         let allAtendimentos = [];
         let currentFilter = { column: null, value: null, label: null };
         const jsonFilePath = 'analise semanal.json';
+        let isDataLoadedSuccessfully = false; // Flag para rastrear sucesso/falha
 
 
         // Estado inicial de dados vazios para fallback
@@ -917,14 +918,19 @@
                 const value = card.getAttribute('data-filter-val');
                 const label = card.querySelector('.kpi-label').textContent;
                 
+                // Remove o listener anterior para evitar duplicação a cada recarregamento
+                // (Embora não seja estritamente necessário para elementos estáticos, é uma boa prática)
+                const newCard = card.cloneNode(true);
+                card.parentNode.replaceChild(newCard, card);
+                
                 if (column && value) {
-                    card.addEventListener('click', () => {
+                    newCard.addEventListener('click', () => {
                          applyFilter(column, value, label);
                     });
                     
                     // Se for o KPI ativo, adiciona a classe visual.
                     if (currentFilter.column === column && currentFilter.value === value) {
-                         card.classList.add('active-filter');
+                         newCard.classList.add('active-filter');
                     }
                 }
             });
@@ -937,6 +943,17 @@
 
         // --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ---
         function renderDashboard(data) {
+            
+            // Se o dashboard não foi carregado com sucesso na última tentativa, não tenta renderizar nada além da mensagem de erro.
+            if (!isDataLoadedSuccessfully && data === emptyState) {
+                 // Exibe a mensagem solicitada pelo usuário no painel de KPIs
+                document.getElementById('kpi-cards-container').innerHTML = 
+                    `<div class="no-data-message">
+                        ❌ **NENHUM DADO ENCONTRADO** ❌<br>
+                        Não foi possível carregar o arquivo **${jsonFilePath}**. Verifique se ele está na pasta correta e se você está usando um Servidor Web Local.
+                    </div>`;
+                return; // Para a execução se falhou
+            }
             
             let kpis, celulas, status_prazo, sistemas, fluxos, projecao, projecao7d, insights;
 
@@ -1046,7 +1063,7 @@
                     `;
                 });
             } else {
-                 htmlFluxos = `<div style="text-align: center; color: var(--cor-texto-secundario); padding: 50px 0;">${emptyState.insights.celula}</div>`;
+                 htmlFluxos = `<div style="text-align: center; color: var(--cor-texto-secundario); padding: 50px 0;">Não há dados de Área de Serviço para exibir ou o filtro atual não retornou resultados.</div>`;
             }
 
             fluxoContainer.innerHTML = htmlFluxos;
@@ -1064,7 +1081,8 @@
             renderProjecaoChart(projecao7d);
             
             // Garante que o estado visual dos KPIs seja atualizado após a renderização
-            setupEventListeners(); 
+            setupEventListeners();
+            updateFilterDisplay(currentFilter.label, currentFilter.column, currentFilter.value); 
         }
         
         /**
@@ -1111,7 +1129,7 @@
                     `;
                 });
             } else {
-                 htmlBarras = `<div style="text-align: center; color: var(--cor-texto-secundario); padding: 50px 0;">${emptyState.insights.celula}</div>`;
+                 htmlBarras = `<div style="text-align: center; color: var(--cor-texto-secundario); padding: 50px 0;">Não há dados para exibir ou o filtro atual não retornou resultados.</div>`;
             }
 
             container.innerHTML = htmlBarras;
@@ -1132,17 +1150,25 @@
         }
 
 
-        // --- CARREGAMENTO DE DADOS (USANDO FETCH) ---
-
-        let isDataLoadedSuccessfully = false; // Flag para rastrear sucesso/falha
-
-        document.addEventListener('DOMContentLoaded', async () => {
+        // --- FUNÇÃO DE CARREGAMENTO DE DADOS (USANDO FETCH) ---
+        /**
+         * Função para carregar os dados e renderizar o dashboard.
+         * É chamada na inicialização e pelo setInterval.
+         */
+        async function reloadData() {
             let dataToRender;
             let errorMessage = null;
-
+            
+            // 1. Tenta carregar o JSON
             try {
-                // Tenta carregar o arquivo JSON do usuário
-                const response = await fetch(jsonFilePath);
+                // Se um filtro estiver ativo e não for o filtro inicial, precisamos manter o filtro
+                if (currentFilter.column && currentFilter.value) {
+                    // Temporariamente seta a flag para true antes de carregar (caso tenha sido false)
+                    isDataLoadedSuccessfully = true; 
+                    // O filtro será aplicado no final, em applyFilter, que chama renderDashboard
+                }
+                
+                const response = await fetch(jsonFilePath + '?v=' + new Date().getTime()); // Adiciona timestamp para evitar cache do navegador
                 
                 if (!response.ok) {
                     errorMessage = `Erro ao carregar o arquivo: ${response.statusText}. Status: ${response.status}`;
@@ -1150,35 +1176,51 @@
                 }
                 
                 // Armazena o dataset completo na variável global
-                allAtendimentos = await response.json(); 
-                dataToRender = allAtendimentos;
-                isDataLoadedSuccessfully = true;
+                const newAllAtendimentos = await response.json(); 
+                
+                // Só atualiza os dados se o novo array for um array válido
+                if (Array.isArray(newAllAtendimentos) && newAllAtendimentos.length > 0) {
+                    allAtendimentos = newAllAtendimentos;
+                    isDataLoadedSuccessfully = true;
+                } else {
+                    // Se o JSON estiver vazio ou for inválido, mas o carregamento foi OK.
+                    allAtendimentos = [];
+                    isDataLoadedSuccessfully = true; // O carregamento HTTP foi bem sucedido
+                }
+
 
             } catch (error) {
-                // *** MODIFICAÇÃO PRINCIPAL: USAR emptyState (Estado Vazio/Zero) em caso de falha ***
+                // Em caso de falha na requisição HTTP ou parse de JSON
                 dataToRender = emptyState;
-                allAtendimentos = []; // Garante que o array global esteja vazio
+                allAtendimentos = []; 
                 isDataLoadedSuccessfully = false;
                 errorMessage = errorMessage || `Erro ao processar o JSON. Detalhe: ${error.message}`;
             }
-
-            // A renderização inicial usa todos os dados carregados ou o estado vazio.
-            renderDashboard(dataToRender);
-            // O setupEventListeners será chamado dentro de renderDashboard, mas podemos garantir aqui:
-            setupEventListeners(); 
-
-            // Exibir a mensagem de erro se os dados vazios foram usados (falha no carregamento)
-            if (!isDataLoadedSuccessfully) {
-                console.error(errorMessage);
-                // Exibe a mensagem solicitada pelo usuário no painel de KPIs
-                document.getElementById('kpi-cards-container').innerHTML = 
-                    `<div class="no-data-message">
-                        ❌ **NENHUM DADO ENCONTRADO** ❌<br>
-                        Não foi possível carregar o arquivo **${jsonFilePath}**. Verifique se ele está na pasta correta e se você está usando um Servidor Web Local.
-                    </div>`;
+            
+            // 2. Aplica o filtro atual e renderiza (se houver filtro, ele usa os dados filtrados)
+            if (isDataLoadedSuccessfully) {
+                 // Usa a função applyFilter para garantir que a re-renderização respeite o filtro atual
+                 applyFilter(currentFilter.column, currentFilter.value, currentFilter.label);
             } else {
-                 console.log("Dashboard renderizado com sucesso a partir do JSON carregado.");
+                 // Em caso de falha total (isDataLoadedSuccessfully = false), renderiza o estado vazio/erro
+                 renderDashboard(emptyState); 
+                 console.error(errorMessage);
             }
+
+            console.log(`Dados recarregados em: ${new Date().toLocaleTimeString('pt-BR')}`);
+        }
+        
+        
+        // --- INICIALIZAÇÃO E RECARREGAMENTO AUTOMÁTICO ---
+        document.addEventListener('DOMContentLoaded', () => {
+             
+            // Chamada inicial para carregar os dados
+            reloadData(); 
+            
+            // Configura a atualização automática a cada 3 segundos (3000 ms)
+            // A variável 'intervalId' é opcional, mas útil se você quiser pausar a atualização
+            const intervalId = setInterval(reloadData, 10000);
+            console.log(`Atualização automática configurada: a cada 3 segundos (ID: ${intervalId})`);
         });
 
 
