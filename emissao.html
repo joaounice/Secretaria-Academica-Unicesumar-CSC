@@ -692,6 +692,11 @@
         let currentFilters = {};
         let currentFilterColumnId = null;
 
+        // **NOVO:** Variáveis para persistência da ordenação
+        let currentSortColumnId = null;
+        let currentSortDirection = null;
+
+
         // NOVAS VARIÁVEIS GLOBAIS PARA O CONFLITO
         const spinnerElement = document.querySelector('.spinner');
         const conflictMessageElement = document.getElementById('conflict-message');
@@ -1275,6 +1280,9 @@
 
                     GID_ATUAL = gid;
                     currentFilters = {};
+                    currentSortColumnId = null; // **NOVO:** Limpa a ordenação ao mudar de aba
+                    currentSortDirection = null; // **NOVO:** Limpa a ordenação ao mudar de aba
+
 
                     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
@@ -1332,7 +1340,13 @@
                             event.stopPropagation();
                             openFilterPopup(colMap.colunaId, th);
                         });
+
+                        // **NOVO:** Adiciona classe 'filtered' se o filtro estiver ativo
+                        if (currentFilters[colMap.colunaId]) {
+                            th.classList.add('filtered');
+                        }
                     }
+
                     headerRow.appendChild(th);
                 });
 
@@ -1518,7 +1532,10 @@
                 container.classList.remove('loading');
                 container.appendChild(table);
 
-                applyFilter(); // Chama o applyFilter para configurar a numeração
+                applyFilter(); // Chama o applyFilter para configurar a numeração e filtros
+
+                // **NOVO:** Reaplica a ordenação após o carregamento
+                reaplicarOrdenacao();
 
             } catch (error) {
                 console.error("Erro ao carregar os dados da planilha:", error);
@@ -1555,6 +1572,11 @@
 
             const rows = Array.from(tableBody.rows);
 
+            // **NOVO:** Armazena o estado da ordenação
+            currentSortColumnId = columnId;
+            currentSortDirection = direction;
+
+
             rows.sort((rowA, rowB) => {
                 const valueA = obterValorCelular(rowA, columnId);
                 const valueB = obterValorCelular(rowB, columnId);
@@ -1577,6 +1599,34 @@
 
             iniciarPolling(); // Reinicia o polling após a classificação
         }
+
+        // **NOVO:** Função para reaplicar a ordenação após recarga ou filtro
+        function reaplicarOrdenacao() {
+            if (currentSortColumnId && currentSortDirection) {
+                const tableBody = document.querySelector('#tabela-container tbody');
+                if (!tableBody) return;
+
+                const rows = Array.from(tableBody.rows);
+
+                rows.sort((rowA, rowB) => {
+                    const valueA = obterValorCelular(rowA, currentSortColumnId);
+                    const valueB = obterValorCelular(rowB, currentSortColumnId);
+
+                    let comparison = 0;
+                    if (valueA > valueB) {
+                        comparison = 1;
+                    } else if (valueA < valueB) {
+                        comparison = -1;
+                    }
+
+                    return currentSortDirection === 'asc' ? comparison : comparison * -1;
+                });
+
+                // Reinsere as linhas na ordem classificada
+                rows.forEach(row => tableBody.appendChild(row));
+            }
+        }
+
 
         function adicionarListenersDeOrdenacao(columnId) {
             // Remove listeners antigos para evitar duplicação (boa prática)
@@ -1761,6 +1811,9 @@
             if (columnId) {
                 closeFilterPopup();
             }
+
+            // **NOVO:** Reaplica a ordenação após a filtragem
+            reaplicarOrdenacao();
         }
 
         function toggleSelectAll(selectAllButton) {
@@ -1843,7 +1896,14 @@
             idIntervaloAtualizacao = setInterval(() => {
 
                 if (typeof iniciarTabs === 'function') {
-                    iniciarTabs();
+                    // Chama carregarDadosPlanilha diretamente (sem iniciarTabs) para não recarregar a lista de colaboradores ou recriar os botões de aba.
+                    // O carregarDadosPlanilha já chama applyFilter e reaplicarOrdenacao.
+                    if (GID_ATUAL) {
+                        pararPolling(); // Para para evitar concorrência se a recarga demorar
+                        carregarDadosPlanilha(GID_ATUAL).finally(() => {
+                            iniciarPolling(); // Reinicia após a recarga
+                        });
+                    }
 
                 }
             }, INTERVALO_ATUALIZACAO_MS);
