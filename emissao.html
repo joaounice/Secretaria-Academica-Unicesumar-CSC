@@ -122,6 +122,33 @@
             /* Aumentado para sobrepor o modal e filtros */
         }
 
+        /* NOVO ESTILO PARA COLUNA # */
+        th[data-col="numero"],
+        td[data-col="numero"] {
+            width: 40px !important;
+            min-width: 40px !important;
+            max-width: 40px !important;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        th[data-col="numero"] {
+            color: #eef7ff;
+            background-color: #007bff;
+        }
+
+        /* NOVO ESTILO PARA COLUNA STATUS */
+        th[data-col="status"],
+        td[data-col="status"] {
+            width: 160px;
+            /* ADICIONADO: Aumenta a largura para a coluna STATUS */
+            min-width: 160px;
+            max-width: 160px;
+        }
+
+        /* FIM NOVO ESTILO */
+
+
         /* ----------------------- FILTRO CSS ----------------------- */
         th {
             cursor: pointer;
@@ -130,7 +157,8 @@
 
         .filter-icon {
             margin-left: 5px;
-            font-size: 10px; /* Mantido, embora possa não ser mais necessário */
+            font-size: 10px;
+            /* Mantido, embora possa não ser mais necessário */
             /* Triângulo apontando para baixo */
             display: inline-block;
             width: 0;
@@ -140,14 +168,18 @@
             border-top: 7px solid #ffffff;
             transition: border-top-color 0.3s;
             vertical-align: middle;
+            /* ADICIONADO: Transição de cor para o ícone */
+            transition: border-top-color 0.3s;
         }
-/*https://img.icons8.com/?size=100&id=Qb8sG15aJyn5&format=png&color=000000*/
 
+        /* ATUALIZADO: Mantém o ícone visível, mas muda a cor do triângulo para sinalizar o filtro */
         th.filtered .filter-icon {
-            border-top-color: #007bff;
-            /* Cor diferente quando o filtro está ativo */
+            border-top-color: #ffc107;
+            /* Cor de aviso (amarelo) quando o filtro está ativo */
             transform: scale(1.3);
         }
+
+        /*https://img.icons8.com/?size=100&id=Qb8sG15aJyn5&format=png&color=000000*/
 
         #filter-popup {
             display: none;
@@ -326,7 +358,8 @@
         }
 
 
-        table tbody td:nth-child(n+3):nth-child(-n+6) {
+        table tbody td:nth-child(n+4):nth-child(-n+7) {
+            /* AJUSTADO: Começa na 4ª coluna (antes era 3ª) */
             visibility: hidden;
             font-size: 0;
             color: transparent;
@@ -338,12 +371,15 @@
             border: 1px solid #dee2e6;
         }
 
-        table tbody td:nth-child(6) {
+        table tbody td:nth-child(7) {
+            /* AJUSTADO: 7ª coluna (antes era 6ª) */
             border-right: 1px solid #dee2e6 !important;
         }
 
-        .andamento-ativo td:nth-child(n+3):nth-child(-n+6),
-        .concluido-ativo td:nth-child(n+3):nth-child(-n+6) {
+        .andamento-ativo td:nth-child(n+4):nth-child(-n+7),
+        /* AJUSTADO: Começa na 4ª coluna (antes era 3ª) */
+        .concluido-ativo td:nth-child(n+4):nth-child(-n+7) {
+            /* AJUSTADO: Começa na 4ª coluna (antes era 3ª) */
             visibility: visible;
             font-size: initial;
             color: inherit;
@@ -633,7 +669,10 @@
         let GID_ATUAL = null;
         let LISTA_COLABORADORES = [];
 
+        // NOVO: Adicionada a coluna "#" no início
         const COLUNA_MAPA = [
+            { novoTitulo: "#", colunaId: 'numero', filterable: false, isNumbering: true, width: "40px" },
+
             { novoTitulo: "STATUS", jsonIndex: 0, colunaId: 'status', filterable: true },
             { novoTitulo: "COLABORADOR", jsonIndex: 1, colunaId: 'colaborador', filterable: true },
             { novoTitulo: "PLATAFORMA", jsonIndex: 2, colunaId: 'plataforma', filterable: false },
@@ -1317,7 +1356,17 @@
 
 
                     COLUNA_MAPA.forEach((colMap) => {
-                        const cellData = row.c[colMap.jsonIndex];
+                        const td = tr.insertCell();
+                        td.setAttribute('data-col', colMap.colunaId);
+
+                        // NOVO: Tratamento especial para coluna de numeração
+                        if (colMap.isNumbering) {
+                            td.textContent = ''; // O número será preenchido em applyFilter
+                            return;
+                        }
+
+                        const colMapIndex = colMap.jsonIndex;
+                        const cellData = row.c[colMapIndex];
                         let cellValue;
 
                         // CORREÇÃO: Tratamento especial para 'DATA PRAZO' (data_prazo)
@@ -1346,9 +1395,6 @@
                             columnId: colMap.colunaId,
                             value: cellValue
                         });
-
-                        const td = tr.insertCell();
-                        td.setAttribute('data-col', colMap.colunaId);
 
                         // Coluna 'STATUS'
                         if (colMap.colunaId === 'status') {
@@ -1472,7 +1518,7 @@
                 container.classList.remove('loading');
                 container.appendChild(table);
 
-                applyFilter();
+                applyFilter(); // Chama o applyFilter para configurar a numeração
 
             } catch (error) {
                 console.error("Erro ao carregar os dados da planilha:", error);
@@ -1594,6 +1640,7 @@
                 return a.localeCompare(b);
             });
 
+            // Se não houver filtro ativo, todos os valores são considerados "selecionados"
             const currentSelected = currentFilters[columnId] || sortedValues;
 
             sortedValues.forEach(value => {
@@ -1642,11 +1689,14 @@
                     .map(input => input.value);
 
                 if (checkedValues.length === allValues.length || checkedValues.length === 0) {
+                    // Se todos estiverem selecionados (ou nenhum, que equivale a limpar), remove o filtro
                     delete currentFilters[columnId];
                 } else {
                     currentFilters[columnId] = checkedValues;
                 }
             }
+            // OBS: Se applyFilter for chamado sem um columnId (ex: ao carregar), ele apenas refaz a filtragem
+            // com os filtros existentes.
 
             const tableBody = document.querySelector('#tabela-container tbody');
             if (!tableBody) return;
@@ -1656,6 +1706,8 @@
                 acc[col.colunaId] = index;
                 return acc;
             }, {});
+
+            let visibleRowCount = 0; // NOVO: Contador para a numeração
 
             Array.from(tableBody.rows).forEach(row => {
                 let isVisible = true;
@@ -1683,8 +1735,20 @@
                 });
 
                 row.style.display = isVisible ? '' : 'none';
+
+                // NOVO: Aplica a numeração dinâmica
+                const numeroCell = row.querySelector('td[data-col="numero"]');
+                if (numeroCell) {
+                    if (isVisible) {
+                        visibleRowCount++;
+                        numeroCell.textContent = visibleRowCount;
+                    } else {
+                        numeroCell.textContent = ''; // Limpa o número da linha se estiver invisível
+                    }
+                }
             });
 
+            // ATUALIZADO: Adiciona/Remove a classe 'filtered' para manter o ícone visível, mas com cor diferente
             document.querySelectorAll('th[data-col][data-filterable="true"]').forEach(th => {
                 const colId = th.getAttribute('data-col');
                 if (currentFilters[colId]) {
@@ -1731,11 +1795,24 @@
             toggleSelectAll(event.target);
         });
 
+        // CORRIGIDO: O botão de limpar filtro agora limpa o filtro da coluna atual e aplica.
         document.getElementById('filter-clear').addEventListener('click', () => {
             if (currentFilterColumnId) {
+                // Remove o filtro da coluna atual
                 delete currentFilters[currentFilterColumnId];
+
+                // Remove a classe 'filtered' para remover a cor do ícone
+                const header = document.querySelector(`th[data-col="${currentFilterColumnId}"]`);
+                if (header) {
+                    header.classList.remove('filtered');
+                }
+
+                // Aplica a filtragem para reexibir todas as linhas (ou aplicar outros filtros)
                 applyFilter();
             }
+
+            // Fecha o popup após limpar
+            closeFilterPopup();
         });
 
         document.getElementById('filter-options').addEventListener('change', (event) => {
@@ -1751,7 +1828,7 @@
         document.addEventListener('DOMContentLoaded', iniciarTabs);
 
         // --- LÓGICA DE POLLING ---
-        const INTERVALO_ATUALIZACAO_MS = 15000;
+        const INTERVALO_ATUALIZACAO_MS = 15000;//ATUALIZAÇÃO DE DADOS DA PLANILHA A CADA 15 SEGUNDOS
 
         let idIntervaloAtualizacao = null;
 
@@ -1791,13 +1868,13 @@
         // -----------------------------------------------------
 
         // Desabilita o menu de contexto (botão direito do mouse)
-        document.addEventListener('contextmenu', function(e) {
+        document.addEventListener('contextmenu', function (e) {
             e.preventDefault();
         });
 
-        
+
         // Desabilita teclas comuns do DevTools e outras
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             // F12 check
             const isF12 = e.key === 'F12' || e.keyCode === 123;
             // Ctrl+Shift+I check (I = 73)
@@ -1815,7 +1892,7 @@
                 e.preventDefault();
             }
         });
-        
+
         // Novo: Detecção Ativa de DevTools (console.log)
         // Se o console estiver aberto, a função 'console.log' com um objeto demora muito mais a ser executada.
         const devtoolsCheck = () => {
@@ -1823,16 +1900,16 @@
             const loop = () => {
                 const start = performance.now();
                 // Tenta logar um objeto para forçar o DevTools a inspecionar, o que atrasa a execução se estiver aberto.
-                console.log('%c', 'display: none'); 
+                console.log('%c', 'display: none');
                 const end = performance.now();
-                
+
                 // Se a diferença de tempo for maior que o limite, o DevTools está aberto.
                 if (end - start > threshold) {
                     // Bloqueio: Redireciona para uma página vazia ou fecha a janela
                     document.body.innerHTML = '<h1>Acesso negado.</h1>';
                     // window.close(); // Pode não funcionar na maioria dos navegadores
                 }
-                
+
                 // Executa a cada X milissegundos
                 setTimeout(loop, 500);
             };
