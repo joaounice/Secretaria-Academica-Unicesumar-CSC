@@ -485,7 +485,7 @@
         };
 
 
-        // --- FUNÇÕES DE PROCESSAMENTO DE DADOS ---
+        // --- FUNÇÕES DE PROCESSAMENTO DE DADOS (Sem alterações funcionais) ---
 
         function formatNumber(num) {
             if (typeof num === 'number') {
@@ -523,9 +523,6 @@
 
         /**
          * Mapeia o NM_STATUS_PRAZO_AND para uma chave simples.
-         * É usada em processarDadosDoArray e na lógica de filtro.
-         * @param {string} statusPrazo - O valor do campo NM_STATUS_PRAZO_AND
-         * @returns {string} - A chave simplificada ('ATRASADO', 'VENCE HOJE', 'A_VENCER', 'SEM SLA')
          */
         function mapStatusToKey(statusPrazo) {
              const status = (statusPrazo || "Não tem SLA").trim();
@@ -537,7 +534,6 @@
              } else if (status === 'Não tem SLA') {
                  return 'SEM SLA';
              } 
-             // Qualquer outro valor ("3. Vence em 1 dia", "4. Vence em 2 dias" etc.) é considerado 'A VENCER'.
              else {
                  return 'A VENCER';
              }
@@ -559,7 +555,6 @@
 
                 const entry = fluxosMap.get(area);
                 entry.total++;
-                // O status simplificado pode ser 'ATRASADO', 'VENCE HOJE', 'SEM SLA' ou 'A VENCER'
                 entry.statusCounts[statusSimplificado]++; 
             });
 
@@ -574,7 +569,6 @@
          * Calcula o Dia de Pico de Atendimentos com base na DT_PRAZO
          */
         function getDiaDePico(dataArray) {
-            // ... (implementação original)
             if (!dataArray || dataArray.length === 0) {
                 return { pico: 0, data: "N/D" };
             }
@@ -617,7 +611,6 @@
          * Agrupa atendimentos por DT_PRAZO, filtra para os próximos 7 dias e formata para Chart.js.
          */
         function calcularProjecao7Dias(dataArray) {
-            // ... (implementação original)
              const contagemPorDia = dataArray.reduce((acc, item) => {
                 const dataPrazo = item.DT_PRAZO ? String(item.DT_PRAZO).substring(0, 10) : null;
                 if (dataPrazo) {
@@ -653,20 +646,18 @@
 
         /**
          * Analisa o array de atendimentos e calcula KPIs e Distribuições.
-         * AJUSTADO PARA O NOVO KPI 'VENCE HOJE'.
          */
         function processarDadosDoArray(atendimentos) {
             if (!Array.isArray(atendimentos) || atendimentos.length === 0) {
-                // Retorna o estado vazio se o array estiver vazio
                 return emptyState;
             }
 
             let total = atendimentos.length;
-            let aVencer = 0;   // 3. Vence em 1 dia, 4. Vence em 2 dias, etc.
-            let venceHoje = 0; // 2. Vence hoje
-            let atrasado = 0;  // 1. Atrasado
-            let semSla = 0;    // Não tem SLA
-            let naoMapeado = 0; // Para itens com status desconhecido/não mapeado
+            let aVencer = 0;   
+            let venceHoje = 0; 
+            let atrasado = 0;  
+            let semSla = 0;    
+            let naoMapeado = 0;
 
             atendimentos.forEach(item => {
                 const statusPrazo = (item.NM_STATUS_PRAZO_AND || "Não tem SLA").trim();
@@ -676,7 +667,7 @@
                 } else if (statusPrazo === '1. Atrasado') {
                     atrasado++;
                 } else if (statusPrazo === '2. Vence hoje') {
-                    venceHoje++; // NOVO CÁLCULO
+                    venceHoje++; 
                 } else if (statusPrazo.startsWith('3. Vence') || 
                          statusPrazo.startsWith('4. Vence') || 
                          statusPrazo.startsWith('5. Vence') || 
@@ -691,13 +682,12 @@
             
             let kpis = {
                 total: total,
-                prazo: aVencer,         // 'A Vencer' (futuro)
-                vence_hoje: venceHoje,  // 'Vence Hoje'
-                fora_prazo: atrasado,   // 'Fora do Prazo' (atrasado)
-                sem_sla: semSla + naoMapeado // Soma o 'Sem SLA' explícito e o 'Não Mapeado'
+                prazo: aVencer,         
+                vence_hoje: venceHoje,  
+                fora_prazo: atrasado,   
+                sem_sla: semSla + naoMapeado 
             };
             
-            // Reajusta a contagem de 'sem_sla' para garantir a soma total.
             kpis.sem_sla = total - kpis.prazo - kpis.vence_hoje - kpis.fora_prazo; 
 
             const celulas = calcularFrequencia(atendimentos, 'NM_CELULA');
@@ -708,7 +698,6 @@
             const projecao = getDiaDePico(atendimentos);
             const projecao7d = calcularProjecao7Dias(atendimentos); 
 
-            // Usa os insights do emptyState em caso de zero, ou preenche insights básicos se houver dados
             const insights = {
                 celula: celulas.length > 0 ? `A célula mais representativa é ${celulas[0].nome} com ${formatNumber(celulas[0].valor)} atendimentos.` : emptyState.insights.celula,
                 status_prazo: status_prazo.length > 0 ? `O status mais comum é ${status_prazo[0].nome} com ${formatNumber(status_prazo[0].valor)} ocorrências.` : emptyState.insights.status_prazo,
@@ -723,14 +712,12 @@
          * Renderiza o gráfico de linha de projeção (7 Dias) usando Chart.js
          */
         function renderProjecaoChart(chartData) {
-            // ... (implementação original)
             const ctx = document.getElementById('lineChartProjecao').getContext('2d');
             
             if (window.lineChartInstance) {
                 window.lineChartInstance.destroy();
             }
 
-            // Verifica se há dados para ajustar o estilo
             const hasData = chartData.counts.some(c => c > 0);
             const backgroundColor = hasData ? 'rgba(0, 86, 179, 0.1)' : 'transparent';
             const borderColor = hasData ? 'var(--cor-total)' : 'var(--cor-divisoria)';
@@ -744,7 +731,6 @@
                         label: 'Volume de Atendimentos',
                         data: chartData.counts,
                         
-                        // --- ESTILOS OTIMIZADOS ---
                         backgroundColor: backgroundColor, 
                         borderColor: borderColor,          
                         borderWidth: 3,                         
@@ -757,7 +743,6 @@
                         pointHoverBorderColor: 'var(--cor-card)',
                         fill: true,                            
                         tension: 0.4                             
-                        // --- FIM ESTILOS OTIMIZADOS ---
                     }]
                 },
                 options: {
@@ -816,30 +801,17 @@
 
 
         // --- FUNÇÕES DE FILTRO E RE-RENDERIZAÇÃO ---
-
+        
         /**
-         * Aplica um filtro ao dataset completo e atualiza o dashboard.
-         * @param {string | null} column - A coluna para filtrar (ex: 'NM_CELULA'). Use null para remover o filtro.
-         * @param {string | null} value - O valor a ser filtrado na coluna (ex: 'Célula A'). Use null para remover o filtro.
-         * @param {string | null} label - Rótulo amigável para exibição.
+         * FUNÇÃO INTERNA: Aplica o filtro ao dataset e atualiza o dashboard.
+         * Esta função NÃO contém a lógica de toggle (limpar filtro se o mesmo for clicado).
+         * @param {string | null} column - A coluna para filtrar.
+         * @param {string | null} value - O valor a ser filtrado.
+         * @param {string | null} label - Rótulo amigável.
          */
-        function applyFilter(column, value, label) {
+        function applyFilterInternal(column, value, label) {
             
-            // Se o filtro clicado for o mesmo do atual, reseta o filtro (toggle)
-            if (column === currentFilter.column && value === currentFilter.value && column !== 'STATUS_FILTRO_KPI') {
-                 column = null;
-                 value = null;
-                 label = null;
-            } 
-            
-            // Se for KPI de TOTAL, sempre reseta.
-            if (value === 'TOTAL') {
-                 column = null;
-                 value = null;
-                 label = null;
-            }
-
-            // Atualiza o estado global
+            // Atualiza o estado global antes de filtrar
             currentFilter = { column, value, label };
             
             let filteredAtendimentos = [];
@@ -874,6 +846,45 @@
             // Atualiza o indicador visual de filtro
             updateFilterDisplay(label, column, value);
         }
+
+        /**
+         * NOVA FUNÇÃO: Lida com o clique do usuário e o TOGLE de filtro (ativar/desativar).
+         * @param {string | null} column - A coluna para filtrar.
+         * @param {string | null} value - O valor a ser filtrado.
+         * @param {string | null} label - Rótulo amigável.
+         */
+        function toggleFilter(column, value, label) {
+            
+            let newColumn = column;
+            let newValue = value;
+            let newLabel = label;
+            
+            // Se o filtro clicado for o mesmo do atual, reseta o filtro (toggle)
+            if (newColumn === currentFilter.column && newValue === currentFilter.value && newColumn !== 'STATUS_FILTRO_KPI') {
+                 newColumn = null;
+                 newValue = null;
+                 newLabel = null;
+            } 
+            
+            // Se for KPI de TOTAL, sempre reseta.
+            if (newValue === 'TOTAL') {
+                 newColumn = null;
+                 newValue = null;
+                 newLabel = null;
+            }
+
+            // Chama a função interna para aplicar o filtro
+            applyFilterInternal(newColumn, newValue, newLabel);
+        }
+
+        /**
+         * NOVA FUNÇÃO: Reaplica o filtro salvo em 'currentFilter' para RECARREGAMENTO automático.
+         * Garante que o filtro ativo seja mantido.
+         */
+        function reapplySavedFilter() {
+             // Simplesmente re-aplica o filtro ativo, sem a lógica de toggle.
+             applyFilterInternal(currentFilter.column, currentFilter.value, currentFilter.label);
+        }
         
         /**
          * Atualiza a barra de filtro ativo na interface.
@@ -887,10 +898,11 @@
             });
             
             if (label) {
+                // O botão de limpar agora chama toggleFilter, que limpa o filtro.
                 filterBar.innerHTML = `
                     <div class="active-filter-bar">
                         <span>Filtro Ativo: **${label}**</span>
-                        <button onclick="applyFilter(null, null, null)">✖ Limpar Filtro</button>
+                        <button onclick="toggleFilter(null, null, null)">✖ Limpar Filtro</button>
                     </div>
                 `;
                 
@@ -919,13 +931,13 @@
                 const label = card.querySelector('.kpi-label').textContent;
                 
                 // Remove o listener anterior para evitar duplicação a cada recarregamento
-                // (Embora não seja estritamente necessário para elementos estáticos, é uma boa prática)
                 const newCard = card.cloneNode(true);
                 card.parentNode.replaceChild(newCard, card);
                 
                 if (column && value) {
+                    // Agora chama toggleFilter para o clique do usuário
                     newCard.addEventListener('click', () => {
-                         applyFilter(column, value, label);
+                         toggleFilter(column, value, label);
                     });
                     
                     // Se for o KPI ativo, adiciona a classe visual.
@@ -934,14 +946,10 @@
                     }
                 }
             });
-
-            // 2. Barras de Gráfico
-            // Os event listeners para as barras de gráfico são adicionados dentro de renderBarChart e renderDashboard (para fluxos),
-            // pois os elementos das barras são recriados a cada renderização.
             
         }
 
-        // --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ---
+        // --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO (onclicks atualizados para toggleFilter) ---
         function renderDashboard(data) {
             
             // Se o dashboard não foi carregado com sucesso na última tentativa, não tenta renderizar nada além da mensagem de erro.
@@ -960,7 +968,6 @@
             // Se 'data' é um array de atendimentos (só acontece no primeiro carregamento, mas mantemos por segurança)
             if (Array.isArray(data)) {
                 const processed = processarDadosDoArray(data);
-                // ... (atribuições de variáveis)
                 kpis = processed.kpis;
                 celulas = processed.celulas;
                 status_prazo = processed.status_prazo;
@@ -987,7 +994,6 @@
             document.getElementById('kpi-prazo').textContent = formatNumber(kpis.prazo || 0);
             document.getElementById('kpi-vence-hoje').textContent = formatNumber(kpis.vence_hoje || 0); 
             document.getElementById('kpi-fora-prazo').textContent = formatNumber(kpis.fora_prazo || 0);
-            // RESTAURADO: Atualiza o cartão 'Sem SLA'
             document.getElementById('kpi-sem-sla').textContent = formatNumber(kpis.sem_sla || 0); 
 
             
@@ -1011,9 +1017,7 @@
             const fluxoContainer = document.getElementById('chart-fluxos');
             const fluxoCol = fluxoContainer.getAttribute('data-chart-col');
             
-            // Mantém a legenda original para reinserir
             const legendaDiv = document.getElementById('legenda-fluxos');
-            // Remove o conteúdo (exceto a legenda)
             let innerContent = fluxoContainer.innerHTML;
             innerContent = innerContent.replace(/<div id="legenda-fluxos".*?<\/div>/s, '');
             fluxoContainer.innerHTML = '';
@@ -1025,14 +1029,12 @@
                     const totalFluxo = item.valor;
                     const counts = item.statusCounts;
                     
-                    // AJUSTE: A ordem deve ser ATRAZADO > VENCE HOJE > A VENCER > SEM SLA
                     const statusOrder = ['ATRASADO', 'VENCE HOJE', 'A VENCER', 'SEM SLA'];
                     let segmentsHTML = '';
                     
                     statusOrder.forEach(status => {
                         const count = counts[status] || 0;
                         if (count > 0) {
-                            // Certifica-se de que o percentual é calculado sobre o total do fluxo, não o total global.
                             const percent = ((count / totalFluxo) * 100); 
                             const statusClass = status.toLowerCase().replace(/\s/g, '-');
                             
@@ -1040,7 +1042,6 @@
                         }
                     });
                     
-                    // Adiciona a barra de preenchimento de fundo para garantir que o contêiner não fique vazio se todos os counts forem zero
                     if (segmentsHTML === '') {
                         segmentsHTML = `<div class="bar-segment sem-sla" style="width: 100%; opacity: 0.2;" title="Sem Status/Dados: ${formatNumber(totalFluxo)}"></div>`;
                     }
@@ -1052,7 +1053,7 @@
                              data-filter-col="${fluxoCol}" 
                              data-filter-val="${item.nome}"
                              data-filter-label="Área: ${item.nome}"
-                             onclick="applyFilter(this.getAttribute('data-filter-col'), this.getAttribute('data-filter-val'), this.getAttribute('data-filter-label'))"
+                             onclick="toggleFilter(this.getAttribute('data-filter-col'), this.getAttribute('data-filter-val'), this.getAttribute('data-filter-label'))"
                         >
                             <span class="bar-label" title="${item.nome}">${item.nome}</span>
                             <div class="bar-line">
@@ -1074,10 +1075,8 @@
 
             // 6. Renderizar Projeção e o NOVO Gráfico
             document.getElementById('projecao-pico').textContent = formatNumber(projecao.pico);
-            // Verifica se há dados de pico ou se é o estado vazio
             document.getElementById('projecao-data').textContent = projecao.data !== 'N/D' ? `Pico em ${projecao.data}` : 'NENHUM DADO ENCONTRADO';
             
-            // Chamada para renderizar o gráfico de linha com o design aprimorado
             renderProjecaoChart(projecao7d);
             
             // Garante que o estado visual dos KPIs seja atualizado após a renderização
@@ -1087,7 +1086,6 @@
         
         /**
          * FUNÇÃO: renderBarChart (Para os gráficos simples - Célula, Status, Sistema)
-         * NOVO PARÂMETRO: chartColumnName
          */
         function renderBarChart(containerId, data, totalGlobal, barClass, insightText, insightElementId, chartColumnName) {
             const container = document.getElementById(containerId);
@@ -1112,13 +1110,13 @@
                     
                     const activeClass = (currentFilter.column === chartColumnName && currentFilter.value === item.nome) ? 'active-filter' : '';
                     
-                    // Adiciona o evento de clique inline para simplificar a lógica (recriação de elementos)
+                    // Adiciona o evento de clique inline (agora chama toggleFilter)
                     htmlBarras += `
                         <div class="bar-item ${activeClass}"
                              data-filter-col="${chartColumnName}" 
                              data-filter-val="${item.nome}"
                              data-filter-label="${chartColumnName.replace('NM_', '').replace('_', ' ')}: ${item.nome}"
-                             onclick="applyFilter(this.getAttribute('data-filter-col'), this.getAttribute('data-filter-val'), this.getAttribute('data-filter-label'))"
+                             onclick="toggleFilter(this.getAttribute('data-filter-col'), this.getAttribute('data-filter-val'), this.getAttribute('data-filter-label'))"
                         >
                             <span class="bar-label" title="${item.nome}">${item.nome}</span>
                             <div class="bar-line simple">
@@ -1161,12 +1159,6 @@
             
             // 1. Tenta carregar o JSON
             try {
-                // Se um filtro estiver ativo e não for o filtro inicial, precisamos manter o filtro
-                if (currentFilter.column && currentFilter.value) {
-                    // Temporariamente seta a flag para true antes de carregar (caso tenha sido false)
-                    isDataLoadedSuccessfully = true; 
-                    // O filtro será aplicado no final, em applyFilter, que chama renderDashboard
-                }
                 
                 const response = await fetch(jsonFilePath + '?v=' + new Date().getTime()); // Adiciona timestamp para evitar cache do navegador
                 
@@ -1199,8 +1191,8 @@
             
             // 2. Aplica o filtro atual e renderiza (se houver filtro, ele usa os dados filtrados)
             if (isDataLoadedSuccessfully) {
-                 // Usa a função applyFilter para garantir que a re-renderização respeite o filtro atual
-                 applyFilter(currentFilter.column, currentFilter.value, currentFilter.label);
+                 // **CHAMADA CORRIGIDA:** Usa a nova função que REAPLICA o filtro sem a lógica de TOGGLE
+                 reapplySavedFilter();
             } else {
                  // Em caso de falha total (isDataLoadedSuccessfully = false), renderiza o estado vazio/erro
                  renderDashboard(emptyState); 
@@ -1220,7 +1212,8 @@
             // Configura a atualização automática a cada 3 segundos (3000 ms)
             // A variável 'intervalId' é opcional, mas útil se você quiser pausar a atualização
             const intervalId = setInterval(reloadData, 10000);
-            console.log(`Atualização automática configurada: a cada 3 segundos (ID: ${intervalId})`);
+            // **CONSOLE.LOG CORRIGIDO:** Agora reflete o intervalo de 10 segundos (10000 ms)
+            console.log(`Atualização automática configurada: a cada 10 segundos (ID: ${intervalId})`);
         });
 
 
