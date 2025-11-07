@@ -3,28 +3,19 @@ import os
 import glob
 import time 
 
-# --- Configurações da TAREFA ORIGINAL (Credenciais) ---
-# Caminho completo do arquivo Excel de origem (source)
-caminho_excel_credenciais = r"C:\Users\Joao.silverio\OneDrive - Uniasselvi\BI - CSC SCRA UniCesumar - Arquivos - Arquivos\RPA\site_secretaria\CREDENCIAIS.xlsx"
-
 # Diretório de destino (target) - SEM subpasta
+# O arquivo JSON de saída será salvo neste diretório
 diretorio_saida = r"C:\Users\Joao.silverio\OneDrive - Uniasselvi\BI - CSC SCRA UniCesumar - Arquivos - Arquivos\RPA\site_secretaria"
 
-# Nome do arquivo JSON
-nome_arquivo_json_credenciais = "credenciais_login_csc.json"
+# --- Configurações da TAREFA (Análise Semanal - Arquivo Mais Recente) ---
 
-# Cria o caminho completo de destino
-caminho_saida_json_credenciais = os.path.join(diretorio_saida, nome_arquivo_json_credenciais)
-
-# --- Configurações da NOVA TAREFA (Análise Semanal - Arquivo Mais Recente) ---
-
-# Diretório de origem para buscar o arquivo mais recente (contém CSVs)
+# Diretório de origem para buscar o arquivo mais recente (contém CSVs da fila)
 diretorio_origem_fila = r"C:\Users\Joao.silverio\OneDrive - Uniasselvi\BI - CSC SCRA UniCesumar - Arquivos - Arquivos\FilaAtendimentos"
 
 # Nome do arquivo JSON de saída para a Análise Semanal
 nome_arquivo_json_analise = "analise semanal.json"
 
-# Cria o caminho completo de destino
+# Cria o caminho completo de destino para o JSON de análise
 caminho_saida_json_analise = os.path.join(diretorio_saida, nome_arquivo_json_analise)
 
 # Limite de tamanho desejado em Megabytes para o arquivo de análise
@@ -65,19 +56,22 @@ def processar_e_salvar_json(caminho_origem, caminho_json_destino, limite_mb_max=
         print(f"Lendo o arquivo de {extensao.upper()}: {nome_arquivo}")
         
         if extensao in ['xlsx', 'xls']:
-            # Leitura para arquivos Excel (usado no Bloco 1)
+            # Leitura para arquivos Excel
             df = pd.read_excel(caminho_origem)
         elif extensao == 'csv':
-            # Leitura para arquivos CSV (usado no Bloco 2)
+            # Leitura para arquivos CSV
             # Tenta ler com os parâmetros comuns para CSVs brasileiros: separador ';', encoding 'latin1'
             try:
-                df = pd.read_csv(caminho_origem, sep=';', encoding='latin1')
+                df = pd.read_csv(caminho_origem, sep=';', encoding='latin1', low_memory=False)
             except pd.errors.ParserError:
-                 # Se falhar com ';', tenta o padrão ','
-                df = pd.read_csv(caminho_origem, sep=',', encoding='latin1')
+                # Se falhar com ';', tenta o padrão ','
+                df = pd.read_csv(caminho_origem, sep=',', encoding='latin1', low_memory=False)
             except UnicodeDecodeError:
                 # Se falhar com latin1, tenta utf-8
-                df = pd.read_csv(caminho_origem, sep=';', encoding='utf-8')
+                try:
+                    df = pd.read_csv(caminho_origem, sep=';', encoding='utf-8', low_memory=False)
+                except:
+                    df = pd.read_csv(caminho_origem, sep=',', encoding='utf-8', low_memory=False)
         else:
             print(f"ERRO: Extensão de arquivo não suportada para leitura: .{extensao}")
             return
@@ -119,29 +113,17 @@ def processar_e_salvar_json(caminho_origem, caminho_json_destino, limite_mb_max=
 
 
 # ====================================================================
-# --- BLOCO 1: PROCESSAMENTO CREDENCIAIS.xlsx (Seu código original) ---
+# --- PROCESSO PRINCIPAL: ANÁLISE SEMANAL (Arquivo CSV Mais Recente) ---
 # ====================================================================
 
 print("=========================================================")
-print("--- INICIANDO PROCESSO 1: CREDENCIAIS.xlsx ---")
+print(f"--- INICIANDO PROCESSO: ANÁLISE SEMANAL (Último CSV em {os.path.basename(diretorio_origem_fila)}) ---")
 print("=========================================================")
 
 # 1. Garante que o diretório de saída exista
 os.makedirs(diretorio_saida, exist_ok=True)
 
-# Chamada da função para processar o arquivo fixo (Excel)
-processar_e_salvar_json(caminho_excel_credenciais, caminho_saida_json_credenciais, limite_mb_max=30.0)
-
-
-# ====================================================================
-# --- BLOCO 2: PROCESSO ANÁLISE SEMANAL (Arquivo CSV Mais Recente) ---
-# ====================================================================
-
-print("\n\n=========================================================")
-print(f"--- INICIANDO PROCESSO 2: ANÁLISE SEMANAL (Último CSV em {os.path.basename(diretorio_origem_fila)}) ---")
-print("=========================================================")
-
-# 1. Encontrar o último arquivo CSV no diretório da fila
+# 2. Encontrar o último arquivo CSV no diretório da fila
 caminho_ultimo_csv = encontrar_ultimo_arquivo(diretorio_origem_fila, 'csv')
 
 if caminho_ultimo_csv:
@@ -151,11 +133,9 @@ if caminho_ultimo_csv:
     print(f"Data de Última Modificação: {data_formatada}")
     print(f"Limite de tamanho para JSON: {limite_mb_analise:.2f} MB")
 
-    # 2. Processar e salvar o JSON
+    # 3. Processar e salvar o JSON
     processar_e_salvar_json(caminho_ultimo_csv, caminho_saida_json_analise, limite_mb_analise)
 else:
     print(f"\nAVISO: Não foram encontrados arquivos CSV (.csv) no diretório: {diretorio_origem_fila}")
 
-print("\n--- FIM DA EXECUÇÃO DE TODOS OS PROCESSOS ---")
-
-#dajdhajdhajdhajdadlhadd
+print("\n--- FIM DA EXECUÇÃO DO PROCESSO ---")
