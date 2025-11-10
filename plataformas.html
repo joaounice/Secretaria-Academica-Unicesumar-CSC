@@ -586,6 +586,69 @@
                 }
             });
         }
+
+        // -----------------------------------------------------
+        // --- MEDIDAS DE "SEGURANÇA POR OBSCURIDADE" (MELHORADAS) ---
+        // -----------------------------------------------------
+
+        // Desabilita o menu de contexto (botão direito do mouse)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Desabilita teclas comuns do DevTools e outras
+        document.addEventListener('keydown', function(e) {
+            // F12 check
+            const isF12 = e.key === 'F12' || e.keyCode === 123;
+            // Ctrl+Shift+I check (I = 73)
+            const isCtrlShiftI = e.ctrlKey && e.shiftKey && (e.key === 'I' || e.keyCode === 73);
+            // Ctrl+Shift+J check (J = 74)
+            const isCtrlShiftJ = e.ctrlKey && e.shiftKey && (e.key === 'J' || e.keyCode === 74);
+            // Ctrl+U check (U = 85) - Ver Código Fonte
+            const isCtrlU = e.ctrlKey && (e.key === 'U' || e.keyCode === 85);
+            // Ctrl+S check (S = 83) - Impede Salvar Página
+            const isCtrlS = e.ctrlKey && (e.key === 'S' || e.keyCode === 83);
+            // Ctrl+Shift+C check (C = 67) - Selecionar Elemento
+            const isCtrlShiftC = e.ctrlKey && e.shiftKey && (e.key === 'C' || e.keyCode === 67);
+
+            if (isF12 || isCtrlShiftI || isCtrlU || isCtrlShiftJ || isCtrlS || isCtrlShiftC) {
+                e.preventDefault();
+            }
+        });
+        
+        // Novo: Detecção Ativa de DevTools (console.log)
+        const devtoolsCheck = () => {
+            const threshold = 100; // Tempo limite em milissegundos
+            const loop = () => {
+                const start = performance.now();
+                // Tenta medir o tempo necessário para logar algo, que aumenta drasticamente se o DevTools estiver aberto
+                console.log('%c', 'display: none'); 
+                const end = performance.now();
+                
+                if (end - start > threshold) {
+                    document.body.innerHTML = '<h1>Acesso negado.</h1>';
+                }
+                
+                setTimeout(loop, 500);
+            };
+            // Se quiser reativar a segurança por obscuridade, descomente a linha abaixo
+            // if (window.console && window.console.log) { loop(); }
+        };
+        // Tenta iniciar a checagem se o console estiver disponível
+        if (window.console && window.console.log) {
+            // devtoolsCheck(); // Descomente para ativar a checagem de DevTools
+        }
+
+        // As variáveis 'sidebar' e 'content' não estão definidas no HTML fornecido.
+        // As linhas abaixo foram removidas/comentadas para evitar ReferenceError.
+        // Inicializa o conteúdo com o blur removido 
+        // sidebar.classList.remove('content-blurred');
+        // content.classList.remove('content-blurred');
+
+
+        // -----------------------------------------------------
+        // --- FIM MEDIDAS DE "SEGURANÇA POR OBSCURIDADE" ---
+        // ------------------------------------------------------
     </script>
     
 </body>
