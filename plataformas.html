@@ -15,9 +15,9 @@
             --color-primary: #0078d4;
             --color-primary-light: #52a9f5;
             --color-secondary: #2c3e50;
-            --background-base: #f0f4f9; /* NOVO FUNDO MAIS CLARO */
+            --background-base: #f0f4f9; 
             --shadow-light: #ffffff;
-            --shadow-dark: #c7d0de; /* Nova Sombra Escura ajustada ao fundo */
+            --shadow-dark: #c7d0de; 
             --text-color-light: #5e6471;
 
             /* Cores dos Apps */
@@ -45,6 +45,9 @@
             --google-color: #4285f4;
             --entra-id-color: #00bcf2;
             --sharepoint-color: #0078d4;
+            
+            /* NOVO: Cor para as plataformas sem cor definida */
+            --globe-color: #0078d4; 
         }
 
         body {
@@ -64,12 +67,11 @@
         h1 {
             font-size: clamp(2.5em, 5vw, 3.8em);
             font-weight: 800;
-            color: var(--color-secondary); /* Cor de texto mais escura para melhor contraste */
+            color: var(--color-secondary); 
             text-align: center;
-            margin-bottom: 50px; /* Mais espaço para o título */
+            margin-bottom: 50px; 
             letter-spacing: -2px;
             text-transform: uppercase;
-            /* Sombra sutil para destacar o texto no fundo claro */
             text-shadow: 2px 2px 4px var(--shadow-dark);
         }
         
@@ -91,14 +93,12 @@
             font-weight: 500;
             color: var(--color-secondary);
             background: var(--background-base);
-            /* Sombra interna para o efeito de 'buraco' */
             box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
             outline: none;
             transition: all 0.3s;
         }
 
         #searchInput:focus {
-            /* Brilho sutil no foco e borda primária suave */
             box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light), 
                         0 0 0 3px rgba(0, 120, 212, 0.2);
             border: 1px solid var(--color-primary);
@@ -111,7 +111,7 @@
             transform: translateY(-50%);
             color: var(--color-primary);
             font-size: 1.2em;
-            opacity: 0.8; /* Suavizar o ícone */
+            opacity: 0.8; 
         }
 
         /* --- Icon Grid Layout --- */
@@ -135,7 +135,7 @@
             font-size: 1.8em;
             font-weight: 700;
             color: var(--color-secondary);
-            margin: 0 0 40px; /* Espaço aprimorado */
+            margin: 0 0 40px; 
             text-align: left;
             letter-spacing: -0.5px;
         }
@@ -171,17 +171,15 @@
             justify-content: center;
             align-items: center;
             margin-bottom: 15px;
-            /* Sombra externa (alto relevo) */
             box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
             transition: all 0.3s ease-in-out;
             border: 1px solid var(--shadow-light);
         }
 
         .icon-item:hover .icon-circle {
-            transform: scale(1.03); /* Suavizado */
-            /* Sombra interna (pressionado) */
+            transform: scale(1.03); 
             box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
-            background: #e9eff5; /* Fundo levemente mais escuro no hover */
+            background: #e9eff5; 
             border: 2px solid var(--icon-color, var(--color-primary)); 
         }
         
@@ -194,7 +192,7 @@
             width: 60%; 
             height: 60%;
             object-fit: contain;
-            border-radius: 10px; /* Arredondar logos para harmonia */
+            border-radius: 10px; 
         }
         .icon-fa {
             font-size: 4em; 
@@ -215,7 +213,7 @@
              color: var(--icon-color, var(--color-primary));
         }
         
-        /* Cores dos Apps (mantidas) */
+        /* Cores dos Apps */
         .duna-icon { --icon-color: var(--duna-color); }
         .gioconda-prod-icon { --icon-color: var(--gioconda-prod-color); }
         .gioconda-homol-icon { --icon-color: var(--gioconda-homol-color); }
@@ -240,6 +238,8 @@
         .google-icon { --icon-color: var(--google-color); }
         .entra-id-icon { --icon-color: var(--entra-id-color); }
         .sharepoint-icon { --icon-color: var(--sharepoint-color); }
+        /* NOVO: Cor e classe para as plataformas principais */
+        .globe-icon { --icon-color: var(--globe-color); }
         
         /* Media Queries (Garantindo Alinhamento) */
 
@@ -286,7 +286,6 @@
     
     <h1> ACESSO RÁPIDO PLATAFORMAS </h1>
     
-    <!-- Novo Componente de Busca (Neumórfico) -->
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="Buscar aplicativo..." onkeyup="filterApps()">
         <i class="fas fa-search search-icon"></i>
@@ -295,59 +294,218 @@
     <div class="icon-grid">
         
         <div class="section-group">
+            <h2>Plataformas Principais 🌐</h2>
+            <div class="icon-row">
+
+                <a href="https://rdwa.unicesumar.edu.br/rdweb" target="_blank" class="icon-item globe-icon" 
+                   title="Sistema acadêmico.">
+                    <div class="icon-circle">
+                        <i class="fas fa-graduation-cap icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">LYCEUM</span>
+                </a>
+
+                <a href="https://lyceum.unicesumar.edu.br/secretaria/login.jsp?error=true" target="_blank" class="icon-item globe-icon" 
+                   title="Extensão de sistema acadêmico.">
+                    <div class="icon-circle">
+                        <i class="fas fa-chart-line icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">LYCEUM WEB</span>
+                </a>
+
+                <a href="https://vitru.sydle.one/#/" target="_blank" class="icon-item globe-icon" 
+                   title="Sistema de atendimento de tickets - serviços solicitados pelos alunos.">
+                    <div class="icon-circle">
+                        <i class="fas fa-ticket-alt icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">SYDLE</span>
+                </a>
+
+                <a href="https://portal-vitru.sydle.com/portal" target="_blank" class="icon-item globe-icon" 
+                   title="Abertura de ticket/chamados internos para demais áreas da IES.">
+                    <div class="icon-circle">
+                        <i class="fas fa-headset icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">PORTAL SOLICITAÇÕES - SYDLE</span>
+                </a>
+
+                <a href="https://sistemasead.unicesumar.edu.br/portal/app/" target="_blank" class="icon-item globe-icon" 
+                   title="Consulta, relatórios e atendimentos de protocolos SPOs e SAEs.">
+                    <div class="icon-circle">
+                        <i class="fas fa-file-alt icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">PORTAL NEAD/SPO/GID</span>
+                </a>
+
+                <a href="https://www.unicesumar.edu.br/portal/" target="_blank" class="icon-item globe-icon" 
+                   title="Consulta, relatórios e atendimentos de protocolos SPOs e SAEs.">
+                    <div class="icon-circle">
+                        <i class="fas fa-address-card icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">PORTAL ATENDIMENTO/INTRANET</span>
+                </a>
+
+                <a href="https://software.leankeep.com/login" target="_blank" class="icon-item globe-icon" 
+                   title="Abertura de chamados de manutenções em geral.">
+                    <div class="icon-circle">
+                        <i class="fas fa-tools icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">LEANKEEP (Manutenções)</span>
+                </a>
+
+                <a href="https://vitru.outbuycenter.com.br/obc/index.php" target="_blank" class="icon-item globe-icon" 
+                   title="Lançamento de pedidos de compra, regularização, compra direta.">
+                    <div class="icon-circle">
+                        <i class="fas fa-shopping-cart icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">OUTBUYCENTER</span>
+                </a>
+
+                <a href="https://sociedadeeducacional54045.rm.cloudtotvs.com.br/FrameHTML/web/app/RH/PortalMeuRH/!/#/login" target="_blank" class="icon-item globe-icon" 
+                   title="Gestão de férias e controle de ponto da equipe e individual do usuário.">
+                    <div class="icon-circle">
+                        <i class="fas fa-clock icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">MEU RH (Totvs)</span>
+                </a>
+
+                <a href="https://login.asselvi.net.br/" target="_blank" class="icon-item globe-icon" 
+                   title="Link de homologação do Gioconda.">
+                    <div class="icon-circle">
+                        <i class="fas fa-flask icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">TESTE GIOCONDA (Homologação)</span>
+                </a>
+
+                <a href="https://www.unicesumar.edu.br/downloads/" target="_blank" class="icon-item globe-icon" 
+                   title="Calendário acadêmico disponibilizado ao aluno.">
+                    <div class="icon-circle">
+                        <i class="fas fa-calendar-alt icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">CALENDÁRIOS UNICESUMAR ONLINE</span>
+                </a>
+
+                <a href="https://fileweb.aon.com/Default.aspx" target="_blank" class="icon-item globe-icon" 
+                   title="Site para faturamento do seguro estágio dos alunos.">
+                    <div class="icon-circle">
+                        <i class="fas fa-handshake icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">FATURAMENTO SEGURO ESTÁGIO</span>
+                </a>
+
+                <a href="https://www.universcead.com.br/curso-livre?categoria=social" target="_blank" class="icon-item globe-icon" 
+                   title="Plataforma da pós anterior ao Studeo.">
+                    <div class="icon-circle">
+                        <i class="fas fa-book-open icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">UNIVERSO (Pós Anterior)</span>
+                </a>
+
+                <a href="https://app.elofy.com.br/" target="_blank" class="icon-item globe-icon" 
+                   title="Ferramenta de avaliação de desempenho.">
+                    <div class="icon-circle">
+                        <i class="fas fa-chart-bar icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">ELOFY (Desempenho)</span>
+                </a>
+
+                <a href="https://unicesumaroficial.gupy.io/companies/jobs?status=published&orderBy=expiresAt&page=1&perPage=50" target="_blank" class="icon-item globe-icon" 
+                   title="Ferramenta de processo seletivo.">
+                    <div class="icon-circle">
+                        <i class="fas fa-user-friends icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">GUPY (Processo Seletivo)</span>
+                </a>
+
+                <a href="https://vitru.hackerhangers.com/#!/entrar" target="_blank" class="icon-item globe-icon" 
+                   title="Programa de segurança realizada pelo T.I.">
+                    <div class="icon-circle">
+                        <i class="fas fa-shield-alt icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">HACKER HANGERS (Segurança T.I.)</span>
+                </a>
+
+                <a href="https://studeo.unicesumar.edu.br/#!/access/login" target="_blank" class="icon-item globe-icon" 
+                   title="Consultar Studeo do aluno.">
+                    <div class="icon-circle">
+                        <i class="fas fa-chalkboard-teacher icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">STUDEO (Colaborador)</span>
+                </a>
+
+                <a href="V:\CSC_Alunos-Servicos_Academicos" target="_blank" class="icon-item globe-icon" 
+                   title="Pastas compartilhadas da secretaria com arquivos rotina, todos colaboradores tem acesso.">
+                    <div class="icon-circle">
+                        <i class="fas fa-folder-open icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">PASTA V (Arquivos Secretaria)</span>
+                </a>
+
+                <a href="https://www.supplymanager.com.br/manager/Login/Index?ReturnUrl=%2fmanager" target="_blank" class="icon-item globe-icon" 
+                   title="Site para compras de materiais em geral.">
+                    <div class="icon-circle">
+                        <i class="fas fa-boxes icon-fa"></i> 
+                    </div>
+                    <span class="icon-name">COMPRAS INTERNAS (Supply Manager)</span>
+                </a>
+
+            </div>
+        </div>
+        
+        <div class="section-group">
             <h2>Microsoft 365 e Ferramentas de Produtividade ⚙️</h2>
             <div class="icon-row">
                 
-                <a href="https://teams.microsoft.com" target="_blank" class="icon-item teams-icon">
+                <a href="https://teams.microsoft.com" target="_blank" class="icon-item teams-icon" title="Comunicação e colaboração da Microsoft.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://static.vecteezy.com/system/resources/previews/027/179/349/non_2x/microsoft-teams-icon-logo-symbol-free-png.png" alt="Microsoft Teams Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=Tms'"> 
                     </div>
                     <span class="icon-name">Teams</span>
                 </a>
 
-                <a href="https://outlook.live.com/" target="_blank" class="icon-item outlook-icon">
+                <a href="https://outlook.live.com/" target="_blank" class="icon-item outlook-icon" title="Acesso ao e-mail corporativo.">
                     <div class="icon-circle">
                         <i class="fas fa-envelope icon-fa" alt="Outlook Logo"></i> 
                     </div>
                     <span class="icon-name">Outlook</span>
                 </a>
                 
-                <a href="https://onedrive.live.com" target="_blank" class="icon-item onedrive-icon">
+                <a href="https://onedrive.live.com" target="_blank" class="icon-item onedrive-icon" title="Armazenamento e sincronização de arquivos na nuvem.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Microsoft_OneDrive_Icon_%282025_-_present%29.svg/1200px-Microsoft_OneDrive_Icon_%282025_-_present%29.svg.png" alt="OneDrive Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=OD'">
                     </div>
                     <span class="icon-name">OneDrive</span>
                 </a>
                 
-                <a href="https://www.sharepoint.com" target="_blank" class="icon-item sharepoint-icon">
+                <a href="https://www.sharepoint.com" target="_blank" class="icon-item sharepoint-icon" title="Criação de sites e portais internos.">
                     <div class="icon-circle">
                         <i class="fas fa-share-alt icon-fa" alt="SharePoint Logo"></i> 
                     </div>
                     <span class="icon-name">SharePoint</span>
                 </a>
                 
-                <a href="https://office.live.com/start/Word.aspx" target="_blank" class="icon-item word-icon">
+                <a href="https://office.live.com/start/Word.aspx" target="_blank" class="icon-item word-icon" title="Editor de texto online.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Microsoft_Office_Word_%282019%E2%80%932025%29.svg/1101px-Microsoft_Office_Word_%282019%E2%80%932025%29.svg.png" alt="Microsoft Word Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=W'">
                     </div>
                     <span class="icon-name">Word Online</span>
                 </a>
 
-                <a href="https://office.live.com/start/Excel.aspx" target="_blank" class="icon-item excel-icon">
+                <a href="https://office.live.com/start/Excel.aspx" target="_blank" class="icon-item excel-icon" title="Planilha eletrônica online.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Microsoft_Office_Excel_%282019%E2%80%932025%29.svg/826px-Microsoft_Office_Excel_%282019%E2%80%932025%29.svg.png" alt="Microsoft Excel Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=E'">
                     </div>
                     <span class="icon-name">Excel Online</span>
                 </a>
                 
-                <a href="https://forms.office.com" target="_blank" class="icon-item forms-icon">
+                <a href="https://forms.office.com" target="_blank" class="icon-item forms-icon" title="Criação de formulários e pesquisas.">
                     <div class="icon-circle">
                         <i class="fab fa-wpforms icon-fa" alt="Microsoft Forms Logo"></i> 
                     </div>
                     <span class="icon-name">MS Forms</span>
                 </a>
                 
-                <a href="https://office.live.com/start/PowerPoint.aspx" target="_blank" class="icon-item powerpoint-icon">
+                <a href="https://office.live.com/start/PowerPoint.aspx" target="_blank" class="icon-item powerpoint-icon" title="Criação de apresentações online.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://cdn.iconscout.com/icon/free/png-256/free-power-point-icon-svg-download-png-190810.png?f=webp" alt="Microsoft PowerPoint Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=P'">
                     </div>
@@ -357,55 +515,53 @@
             </div>
         </div>
 
-        <!-- Linha divisória HTML foi removida para usar apenas CSS/Markdown -->
-
         <div class="section-group">
             <h2>Sistemas Internos e Acadêmicos 📚</h2>
             <div class="icon-row">
 
-                <a href="https://login.uniasselvi.com.br/" target="_blank" class="icon-item gioconda-prod-icon">
+                <a href="https://login.uniasselvi.com.br/" target="_blank" class="icon-item gioconda-prod-icon" title="Sistema ERP principal em ambiente de Produção.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLuxHUq7w7AP_iNuy6Xmsi7S08mx9Uc9Ai_Q&s" alt="Gioconda Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=G.PROD'">
                     </div>
                     <span class="icon-name">Gioconda Produção</span>
                 </a>
 
-                <a href="https://login.asselvi.net.br/" target="_blank" class="icon-item gioconda-homol-icon">
+                <a href="https://login.asselvi.net.br/" target="_blank" class="icon-item gioconda-homol-icon" title="Sistema ERP principal em ambiente de Homologação (Testes).">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLuxHUq7w7AP_iNuy6Xmsi7S08mx9Uc9Ai_Q&s" alt="Gioconda Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=G.HOMOL'">
                     </div>
                     <span class="icon-name">Gioconda Homologação</span>
                 </a>
 
-                <a href="http://18.229.108.173:8081/duna/app/tasklist/default/#/login" target="_blank" class="icon-item duna-icon">
+                <a href="http://18.229.108.173:8081/duna/app/tasklist/default/#/login" target="_blank" class="icon-item duna-icon" title="Sistema de Gestão de Processos de Negócio (BPM).">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Xerox_logo.svg/1280px-Xerox_logo.svg.png" alt="Duna Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=Duna'">
                     </div>
                     <span class="icon-name">DUNA BPM</span>
                 </a>
 
-                <a href="https://studeo.unicesumar.edu.br/#!/access/login" target="_blank" class="icon-item studeo-icon">
+                <a href="https://studeo.unicesumar.edu.br/#!/access/login" target="_blank" class="icon-item studeo-icon" title="Ambiente Virtual de Aprendizagem (AVA) principal.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://studeostatic.unicesumar.edu.br/img/uni-logo-studeo-small.png" alt="Studeo Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=Studeo'">
                     </div>
                     <span class="icon-name">STUDEO</span>
                 </a>
                 
-                <a href="https://vivavitru.prodtool.com.br/APP/#" target="_blank" class="icon-item app-vitru-icon">
+                <a href="https://vivavitru.prodtool.com.br/APP/#" target="_blank" class="icon-item app-vitru-icon" title="Aplicativo para acesso a informações internas da Vitru.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://vivavitru.prodtool.com.br/ws-private/app/requestimg.json?cmd=user&id=10169" alt="App Vitru Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=VITRU'"> 
                     </div>
                     <span class="icon-name">APP VITRU</span>
                 </a>
 
-                <a href="https://vitru.sydle.one/#/login/vitru/" target="_blank" class="icon-item sydle-icon">
+                <a href="https://vitru.sydle.one/#/login/vitru/" target="_blank" class="icon-item sydle-icon" title="Plataforma de Service Desk e gestão de serviços.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://media.licdn.com/dms/image/v2/C4D0BAQG8J8P3_jCo5w/company-logo_200_200/company-logo_200_200/0/1630519600811/sydle_logo?e=2147483647&v=beta&t=g0_jJdSgmIGAJAW2UhaaczXTXsoAhnDGLBpFC40E4t4" alt="SYDLE Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=BI'">
                     </div>
                     <span class="icon-name">SYDLE</span>
                 </a>
 
-                <a href="#link-pulse-ead" target="_blank" class="icon-item pulse-icon">
+                <a href="#link-pulse-ead" target="_blank" class="icon-item pulse-icon" title="Plataforma de gerenciamento de conteúdo EAD.">
                     <div class="icon-circle">
                         <i class="fas fa-heartbeat icon-fa" alt="Pulse EAD Logo"></i> 
                     </div>
@@ -415,48 +571,46 @@
             </div>
         </div>
 
-        <!-- Linha divisória HTML foi removida para usar apenas CSS/Markdown -->
-
         <div class="section-group">
             <h2>Desenvolvimento e Gestão 💻</h2>
             <div class="icon-row">
 
-                <a href="https://code.visualstudio.com" target="_blank" class="icon-item vscode-icon">
+                <a href="https://code.visualstudio.com" target="_blank" class="icon-item vscode-icon" title="Editor de código-fonte amplamente utilizado.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Visual_Studio_Code_1.35_icon.svg/2048px-Visual_Studio_Code_1.35_icon.svg.png" alt="VS Code Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=VS+Code'">
                     </div>
                     <span class="icon-name">VS Code</span>
                 </a>
 
-                <a href="https://github.com" target="_blank" class="icon-item github-icon">
+                <a href="https://github.com" target="_blank" class="icon-item github-icon" title="Plataforma de hospedagem de código para controle de versão.">
                     <div class="icon-circle">
                         <i class="fab fa-github icon-fa" alt="GitHub Logo"></i> 
                     </div>
                     <span class="icon-name">GitHub</span>
                 </a>
 
-                <a href="https://www.trello.com" target="_blank" class="icon-item trello-icon">
+                <a href="https://www.trello.com" target="_blank" class="icon-item trello-icon" title="Ferramenta de gestão de projetos baseada em quadros Kanban.">
                     <div class="icon-circle">
                         <i class="fab fa-trello icon-fa" alt="Trello Logo"></i> 
                     </div>
                     <span class="icon-name">Trello</span>
                 </a>
 
-                <a href="https://app.powerbi.com" target="_blank" class="icon-item powerbi-icon">
+                <a href="https://app.powerbi.com" target="_blank" class="icon-item powerbi-icon" title="Serviço de análise de dados e business intelligence.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/New_Power_BI_Logo.svg/630px-New_Power_BI_Logo.svg.png" alt="Power BI Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=BI'">
                     </div>
                     <span class="icon-name">Power BI</span>
                 </a>
                 
-                <a href="https://www.figma.com" target="_blank" class="icon-item figma-icon">
+                <a href="https://www.figma.com" target="_blank" class="icon-item figma-icon" title="Ferramenta de design e prototipagem de interface.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Figma-logo.svg/1667px-Figma-logo.svg.png" alt="Figma Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=Figma'">
                     </div>
                     <span class="icon-name">Figma</span>
                 </a>
 
-                <a href="https://vitru.sydle.one/#/login/vitru/" target="_blank" class="icon-item sydle-icon">
+                <a href="https://vitru.sydle.one/#/login/vitru/" target="_blank" class="icon-item sydle-icon" title="Plataforma de Service Desk e gestão de serviços (Repetido).">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://melhores.com/resources/service-desk/sydle-one/sydle.webp" alt="SYDLE Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=BI'">
                     </div>
@@ -466,35 +620,32 @@
             </div>
         </div>
         
-        <!-- Linha divisória HTML foi removida para usar apenas CSS/Markdown -->
-
         <div class="section-group">
             <h2>Administrativo e Outros 💼</h2>
             <div class="icon-row">
 
-                <a href="#link-meu-rh" target="_blank" class="icon-item meu-rh-icon">
+                <a href="#link-meu-rh" target="_blank" class="icon-item meu-rh-icon" title="Portal para serviços de Recursos Humanos.">
                     <div class="icon-circle">
                         <i class="fas fa-users icon-fa" alt="Meu RH Logo"></i> 
                     </div>
                     <span class="icon-name">Meu RH</span>
                 </a>
                 
-                <a href="#link-portal-solicitacoes" target="_blank" class="icon-item portal-icon">
+                <a href="#link-portal-solicitacoes" target="_blank" class="icon-item portal-icon" title="Portal genérico para abertura de solicitações e tickets.">
                     <div class="icon-circle">
                         <img class="icon-logo" src="https://melhores.com/resources/service-desk/sydle-one/sydle.webp" alt="SYDLE Logo" onerror="this.onerror=null; this.src='https://placehold.co/120x120/f1f1f1/5e6471?text=BI'">
-
                     </div>
                     <span class="icon-name">Portal de Solicitações</span>
                 </a>
                 
-                <a href="https://portal.azure.com/" target="_blank" class="icon-item entra-id-icon">
+                <a href="https://portal.azure.com/" target="_blank" class="icon-item entra-id-icon" title="Gerenciamento de identidades e acesso (antigo Azure AD).">
                     <div class="icon-circle">
                         <i class="fas fa-user-shield icon-fa" alt="Microsoft Entra ID Logo"></i> 
                     </div>
                     <span class="icon-name">Entra ID (Azure)</span>
                 </a>
 
-                <a href="https://www.google.com" target="_blank" class="icon-item google-icon">
+                <a href="https://www.google.com" target="_blank" class="icon-item google-icon" title="Motor de busca.">
                     <div class="icon-circle">
                         <i class="fab fa-google icon-fa" alt="Google Logo"></i> 
                     </div>
@@ -506,10 +657,10 @@
 
     </div>
 
-    <!-- JavaScript para a função de busca -->
     <script>
         /**
          * Filtra os ícones de aplicativo com base no texto digitado na barra de pesquisa.
+         * Agora busca tanto no nome quanto na descrição (atributo 'title').
          */
         function filterApps() {
             const input = document.getElementById('searchInput');
@@ -518,9 +669,11 @@
 
             // 1. Filtra os itens visíveis
             items.forEach(item => {
-                // Pega o nome do aplicativo para comparação
+                // Pega o nome do aplicativo E a descrição (title) para a busca.
                 const name = item.querySelector('.icon-name').textContent || item.querySelector('.icon-name').innerText;
-                if (name.toUpperCase().indexOf(filter) > -1) {
+                const description = item.getAttribute('title') || "";
+                
+                if (name.toUpperCase().indexOf(filter) > -1 || description.toUpperCase().indexOf(filter) > -1) {
                     item.style.display = "flex"; // Mostra o item
                 } else {
                     item.style.display = "none"; // Esconde o item
