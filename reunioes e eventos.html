@@ -245,14 +245,6 @@
             transition: all 0.3s ease;
         }
 
-        /* REMOVIDO: Estilo que indicava a ativação do Tooltip */
-        /* .status-box.status-hoje.tippy-active:hover {
-            cursor: pointer;
-            box-shadow: 0 8px 35px rgba(0, 0, 0, 0.1);
-            transform: translateY(-3px);
-        } */
-
-
         .status-box h3 {
             margin-top: 0;
             font-size: 1.6em;
@@ -339,13 +331,14 @@
             text-align: left;
             /* Aplicando overflow: hidden e border-radius diretamente para as tabelas que não rolam */
             /* Isso garante que o header arredonde no topo */
-            overflow: hidden; 
+            overflow: hidden;
             border-radius: 10px;
-            border: 1px solid var(--cor-divisoria); /* Borda sutil para indicar o limite da tabela */
+            border: 1px solid var(--cor-divisoria);
+            /* Borda sutil para indicar o limite da tabela */
         }
-        
+
         /* Ajustando as tabelas que estão diretamente no data-section-card e não no scroll container */
-        .data-section-card > .data-table {
+        .data-section-card>.data-table {
             margin-top: 15px;
         }
 
@@ -357,7 +350,7 @@
             white-space: nowrap;
             text-overflow: ellipsis;
         }
-        
+
         /* Garantir que a última linha da tabela não tenha borda inferior */
         .data-table tbody tr:last-child td {
             border-bottom: none;
@@ -536,67 +529,6 @@
         }
 
 
-        /* REMOVIDO: Estilos do Tooltip (Tippy.js) */
-        /* .tippy-box {
-            background-color: var(--cor-card) !important;
-            color: var(--cor-texto-principal) !important;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15) !important;
-            border: 1px solid var(--cor-divisoria) !important;
-            padding: 15px 25px !important;
-            border-radius: 12px !important;
-            max-width: 500px !important;
-        }
-
-        .tippy-arrow {
-            color: var(--cor-card) !important;
-        }
-
-        .today-tooltip-content h4 {
-            font-size: 1.6em;
-            margin: 0 0 10px 0;
-            padding-bottom: 5px;
-            text-align: left;
-            font-weight: 700;
-        }
-
-        .today-item-detail {
-            border-bottom: 1px solid var(--cor-divisoria);
-            padding: 10px 0;
-        }
-
-        .today-list-container .today-item-detail:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .today-list-container p {
-            margin: 0 0 5px 0;
-            font-size: 0.95em;
-        }
-
-        .today-list-container strong {
-            font-weight: 700;
-            color: var(--cor-texto-principal);
-        }
-
-        .reunioes-tooltip.today-tooltip-content h4 {
-            color: var(--cor-reuniao-dark);
-            border-bottom: 2px solid var(--cor-reuniao);
-        }
-
-        .eventos-tooltip.today-tooltip-content h4 {
-            color: var(--cor-evento-dark);
-            border-bottom: 2px solid var(--cor-evento);
-        }
-
-        .today-time {
-            font-weight: 700;
-            color: var(--cor-sucesso);
-            margin-right: 8px;
-            font-size: 1.1em;
-        } */
-
-
         /* Responsividade */
         @media (max-width: 1200px) {
             .comparison-grid {
@@ -632,11 +564,6 @@
                 font-size: 0.75em;
                 margin-top: 4px;
             }
-
-            /* REMOVIDO: Estilo responsivo para Tippy */
-            /* .tippy-box {
-                max-width: 95% !important;
-            } */
         }
 
         @media (max-width: 768px) {
@@ -735,7 +662,7 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <div class="data-section-card">
                         <div class="section-sub-title">Gráfico Histórico: Reuniões (Por Mês)</div>
                         <div class="chart-filter-container">
@@ -755,19 +682,35 @@
                     </div>
 
                     <div class="data-section-card">
-                        <div class="section-sub-title">Próximas Reuniões (Tabela)</div>
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th id="reunioes-header-futuras-a">REUNIÃO</th>
-                                        <th id="reunioes-header-futuras-b">DATA</th>
-                                        <th id="reunioes-header-futuras-c">HORÁRIO</th>
-                                        <th id="reunioes-header-futuras-d">LOCAL</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="reunioes-dataTableBodyFuturas">
-                                </tbody>
-                            </table>
+                        <div class="section-sub-title">Próximas Reuniões</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th id="reunioes-header-futuras-a">REUNIÃO</th>
+                                    <th id="reunioes-header-futuras-b">DATA</th>
+                                    <th id="reunioes-header-futuras-c">HORÁRIO</th>
+                                    <th id="reunioes-header-futuras-d">LOCAL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reunioes-dataTableBodyFuturas">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="data-section-card">
+                        <div class="section-sub-title">Histórico de Reuniões (Realizadas)</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th id="reunioes-header-historico-a">REUNIÃO</th>
+                                    <th id="reunioes-header-historico-b">DATA</th>
+                                    <th id="reunioes-header-historico-c">HORÁRIO</th>
+                                    <th id="reunioes-header-historico-d">LOCAL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reunioes-dataTableBodyHistorico">
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -813,7 +756,7 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <div class="data-section-card">
                         <div class="section-sub-title">Gráfico Histórico: Eventos (Por Mês)</div>
                         <div class="chart-filter-container">
@@ -833,19 +776,35 @@
                     </div>
 
                     <div class="data-section-card">
-                        <div class="section-sub-title">Próximos Eventos (Tabela)</div>
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th id="eventos-header-futuras-a">AVALIAÇÕES</th>
-                                        <th id="eventos-header-futuras-b">DATA</th>
-                                        <th id="eventos-header-futuras-c">HORÁRIO</th>
-                                        <th id="eventos-header-futuras-d">LOCAL</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="eventos-dataTableBodyFuturas">
-                                </tbody>
-                            </table>
+                        <div class="section-sub-title">Próximos Eventos</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th id="eventos-header-futuras-a">AVALIAÇÕES</th>
+                                    <th id="eventos-header-futuras-b">DATA</th>
+                                    <th id="eventos-header-futuras-c">HORÁRIO</th>
+                                    <th id="eventos-header-futuras-d">LOCAL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventos-dataTableBodyFuturas">
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="data-section-card">
+                        <div class="section-sub-title">Histórico de Eventos (Realizados)</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th id="eventos-header-historico-a">AVALIAÇÕES</th>
+                                    <th id="eventos-header-historico-b">DATA</th>
+                                    <th id="eventos-header-historico-c">HORÁRIO</th>
+                                    <th id="eventos-header-historico-d">LOCAL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventos-dataTableBodyHistorico">
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -959,7 +918,7 @@
             };
         }
 
-        // --- FUNÇÕES DE LÓGICA DE DATA (Mantidas) ---
+        // --- FUNÇÕES DE LÓGICA DE DATA (AJUSTADA PARA O NOVO REQUISITO) ---
 
         function parseDate(dateString) {
             if (!dateString) return null;
@@ -992,7 +951,7 @@
         }
 
         /**
-         * FILTRA os itens: Hoje (tabela de hoje), e Futuros (tabela de próximas, a partir de amanhã).
+         * FILTRA os itens: Hoje, Futuros (a partir de amanhã), e Passados (antes de hoje).
          */
         function getTodayAndFutureItems(dados) {
             const today = new Date();
@@ -1003,7 +962,8 @@
             tomorrow.setDate(today.getDate() + 1);
 
             let itemsHoje = [];
-            let itemsAmanhaEmDiante = []; // Esta lista será usada para "Próximas Reuniões/Eventos (Tabela)"
+            let itemsPassados = []; // NOVO: Itens com data ANTERIOR a hoje
+            let itemsAmanhaEmDiante = []; // Itens com data IGUAL ou POSTERIOR a amanhã
 
             dados.forEach(item => {
                 const itemDate = parseDate(item.colB);
@@ -1017,13 +977,17 @@
                         parsedDate: itemDateOnly
                     };
 
-                    // 1. ITENS DE HOJE (Para a tabela "Reuniões de Hoje" e KPI)
+                    // 1. ITENS DE HOJE
                     if (isToday(itemDateOnly, today)) {
                         itemsHoje.push(itemComData);
                     }
 
-                    // 2. ITENS FUTUROS (A partir de amanhã)
-                    // A condição itemDateOnly >= tomorrow garante que só pega a partir do dia seguinte
+                    // 2. ITENS PASSADOS (Data ANTERIOR a hoje, ou seja, < today)
+                    if (itemDateOnly < today) {
+                        itemsPassados.push(itemComData);
+                    }
+
+                    // 3. ITENS FUTUROS (A partir de amanhã)
                     if (itemDateOnly >= tomorrow) {
                         itemsAmanhaEmDiante.push(itemComData);
                     }
@@ -1033,7 +997,10 @@
             // Ordena os itens de hoje por hora (C)
             itemsHoje.sort((a, b) => formatValue(a.colC, false).localeCompare(formatValue(b.colC, false)));
 
-            // Ordena os itens futuros por data e, secundariamente, por hora
+            // Ordena os itens passados por data decrescente (mais recente primeiro)
+            itemsPassados.sort((a, b) => b.parsedDate.getTime() - a.parsedDate.getTime());
+
+            // Ordena os itens futuros por data crescente e, secundariamente, por hora
             itemsAmanhaEmDiante.sort((a, b) => {
                 // Ordenação primária por data
                 if (a.parsedDate < b.parsedDate) return -1;
@@ -1054,20 +1021,11 @@
 
             return {
                 hoje: itemsHoje,
+                passados: itemsPassados, // NOVO: Tabela de Histórico
                 proximo: proximo,
                 todasFuturas: itemsAmanhaEmDiante // Array usado para a tabela "Próximas..." (a partir de amanhã)
             };
         }
-
-
-        /**
-         * REMOVIDA: Função createTodayItemsTooltipHtml não é mais necessária, pois o tooltip foi removido.
-         */
-        /*
-        function createTodayItemsTooltipHtml(todayItems, itemUpper, sectionClass, formattedHeaders) {
-            // ... (Código da função removido)
-        }
-        */
 
 
         /**
@@ -1079,25 +1037,13 @@
             const kpiHoje = document.getElementById(`${prefix}hoje-kpi`);
             const kpiFuturas = document.getElementById(`${prefix}futuras-kpi`);
             const kpiCardHoje = document.getElementById(`${prefix}kpi-hoje`);
-            // Elementos de detalhe removidos
-
-
-            // REMOVIDO: Destruição de tippy anterior (o tippy não existe mais)
-            /*
-            if (statusBox._tippy) {
-                statusBox._tippy.destroy();
-            }
-            */
-
 
             const {
                 hoje,
                 proximo,
                 todasFuturas, // Agora, contém apenas itens a partir de AMANHÃ
-                formattedHeaders
             } = statusData;
             const itemUpper = itemName.toUpperCase();
-            const sectionClass = prefix.replace('-', '');
 
             kpiTotal.textContent = statusData.dataTotal;
             kpiHoje.textContent = hoje.length;
@@ -1111,11 +1057,6 @@
                 kpiCardHoje.classList.add('kpi-alert');
             }
 
-            // REMOVIDO: Geração de conteúdo de tooltip
-            // let tooltipContent = null;
-            // if (hoje.length > 0) {
-            //     tooltipContent = createTodayItemsTooltipHtml(hoje, itemUpper, sectionClass, formattedHeaders);
-            // }
 
             // Lógica do Status Box
             if (hoje.length > 0) {
@@ -1126,23 +1067,12 @@
                 const local = formatValue(primeiraHoje.colD, false);
 
                 const localText = local ? ` Local: <strong>${local}</strong>` : '';
-                // A classe tippy-active e o (+n mais) foram removidos, pois dependiam do tooltip para a lista completa
-                const maisText = ''; // Removido o texto para não prometer a lista completa no pop-up
+                const maisText = '';
 
                 // A classe 'tippy-active' foi removida, pois não haverá tooltip
-                statusBox.className = `status-box status-hoje`; 
+                statusBox.className = `status-box status-hoje`;
                 statusBox.innerHTML = `<h3>✅ ${itemUpper} HOJE, ${data}!</h3>
                                         <p><strong>${nome}</strong>, marcada para as <strong>${hora}</strong>${localText}.${maisText}</p>`;
-
-                // REMOVIDO: Inicialização do Tippy no Status Box (Principal)
-                /*
-                if (typeof tippy === 'function') {
-                    tippy(statusBox, {
-                        content: tooltipContent,
-                        // ... (outras configurações do tippy)
-                    });
-                }
-                */
 
 
             } else if (proximo) {
@@ -1153,7 +1083,7 @@
                 const local = formatValue(proximo.colD, false);
 
                 const statusClass = 'status-proxima';
-                const localText = local ? ` o <strong>${local}</strong>` : '';
+                const localText = local ? ` Local: <strong>${local}</strong>` : '';
 
                 statusBox.className = `status-box ${statusClass}`;
                 statusBox.innerHTML = `<h3>🔔 PRÓXIM${itemUpper.endsWith('O') ? 'O' : 'A'} ${itemUpper}</h3>
@@ -1164,7 +1094,6 @@
                 statusBox.innerHTML = `<h3>❌ NENHUM ${itemUpper} ENCONTRADO</h3>
                                         <p>Sem ${itemName.toLowerCase()} agendados para o futuro.</p>`;
             }
-            // Lógica de Detalhe Próximo removida
         }
 
 
@@ -1179,7 +1108,7 @@
 
             tableBody.innerHTML = '';
 
-            const dataToDisplay = data; 
+            const dataToDisplay = data;
             const numColumns = 4;
 
             if (dataToDisplay.length === 0) {
@@ -1275,7 +1204,7 @@
 
             // Salva o ano selecionado antes de atualizar a lista de anos
             const selectedYearBeforeUpdate = filterSelect.value;
-            
+
             // 1. Get unique years
             const uniqueYears = new Set();
             data.forEach(item => {
@@ -1291,12 +1220,12 @@
             const wasDisabled = filterSelect.disabled;
             filterSelect.innerHTML = '';
             filterSelect.disabled = false;
-            
+
             if (sortedYears.length === 0) {
                 filterSelect.innerHTML = '<option value="">Sem Dados</option>';
                 filterSelect.disabled = true;
                 // Renderiza o gráfico para o ano atual com 0 dados
-                renderMonthlyChart([], new Date().getFullYear(), chartContainerId, sectionClass); 
+                renderMonthlyChart([], new Date().getFullYear(), chartContainerId, sectionClass);
                 return;
             }
 
@@ -1332,7 +1261,7 @@
         }
 
 
-        // --- FUNÇÃO PRINCIPAL REUTILIZÁVEL (AJUSTADA PARA HEADERS FIXOS) ---
+        // --- FUNÇÃO PRINCIPAL REUTILIZÁVEL (AJUSTADA PARA INCLUIR HISTÓRICO DE EVENTOS) ---
 
         async function fetchAndRenderDashboard(gid, prefix, itemName) {
             const url = buildUrl(gid);
@@ -1381,20 +1310,21 @@
 
                 const statusBox = document.getElementById(`${prefix}status-principal`);
                 if (statusBox) {
-                    // REMOVIDO: Limpeza de tippy
-                    // if (statusBox._tippy) statusBox._tippy.destroy();
                     statusBox.className = 'status-box status-sem-dados';
                     statusBox.innerHTML = `<h3>❌ DADOS INDISPONÍVEIS</h3><p>Erro no carregamento de ${itemName}.</p>`;
                 }
                 document.getElementById(`${prefix}bar-chart`).innerHTML = `<p class="empty-cell" style="padding: 20px;">Sem dados.</p>`;
                 renderTable([], `${prefix}dataTableBodyFuturas`);
                 renderTable([], `${prefix}dataTableBodyHoje`);
+                // Renderiza o histórico mesmo em caso de erro para zerar a tabela
+                renderTable([], `${prefix}dataTableBodyHistorico`);
+
 
                 // Tenta inicializar o filtro mesmo sem dados para mostrar "Sem Dados"
                 initializeYearFilter([], prefix);
-                
-                // Mesmo em caso de erro, aplicamos os headers fixos para evitar Coluna A/B/C/D
-                const headerPrefixes = [`${prefix}header-futuras-`, `${prefix}header-hoje-`];
+
+                // Aplica os headers fixos (incluindo o de histórico para ambas as seções)
+                const headerPrefixes = [`${prefix}header-futuras-`, `${prefix}header-hoje-`, `${prefix}header-historico-`];
                 const headerNames = ['a', 'b', 'c', 'd'];
                 const fixedHeaderValues = FIXED_HEADERS[prefix];
 
@@ -1411,12 +1341,13 @@
             }
 
             // 1. Atualiza Headers da Tabela
-            const headerPrefixes = [`${prefix}header-futuras-`, `${prefix}header-hoje-`]; // Ambas as tabelas (Futuras e Hoje)
+            // O array de prefixos deve incluir o histórico para Eventos também
+            const headerPrefixes = [`${prefix}header-futuras-`, `${prefix}header-hoje-`, `${prefix}header-historico-`];
             const headerNames = ['a', 'b', 'c', 'd'];
             const headerKeys = [processedData.headers.keyA, processedData.headers.keyB, processedData.headers.keyC, processedData.headers.keyD];
             const formattedHeaders = {};
 
-            // Headers fixos para as tabelas (conforme solicitado)
+            // Headers fixos para as tabelas
             const fixedHeaderValues = FIXED_HEADERS[prefix];
 
 
@@ -1424,14 +1355,14 @@
                 // Tenta usar o header da planilha. Se for genérico, usa o header fixo.
                 let dynamicHeader = headerKeys[index] ? headerKeys[index].replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) : fixedHeaderValues[index];
 
-                // Força o header dinâmico (usado no Tooltip e Status Box) a usar o nome fixo se for um fallback genérico (Coluna A, B, etc)
+                // Força o header dinâmico (usado no Status Box) a usar o nome fixo se for um fallback genérico (Coluna A, B, etc)
                 if (dynamicHeader.startsWith('Coluna')) {
                     dynamicHeader = fixedHeaderValues[index];
                 }
 
                 formattedHeaders[`col${name.toUpperCase()}`] = dynamicHeader;
 
-                // Aplica o cabeçalho FIXO nas tabelas (Futuras e Hoje)
+                // Aplica o cabeçalho FIXO nas tabelas (Futuras, Hoje e Histórico)
                 headerPrefixes.forEach(hPrefix => {
                     const element = document.getElementById(`${hPrefix}${name}`);
                     if (element) {
@@ -1441,18 +1372,21 @@
             });
 
 
-            // 2. Processa Status, KPIs e Tabela Futura
+            // 2. Processa Status, KPIs e Tabelas
             const itemsStatus = getTodayAndFutureItems(processedData.data);
             itemsStatus.dataTotal = processedData.total;
             itemsStatus.formattedHeaders = formattedHeaders;
 
             updateStatusAndKPIs(itemsStatus, prefix, itemName);
 
-            // A tabela "Próximas Reuniões" agora usa itemsStatus.todasFuturas (a partir de amanhã)
+            // A tabela "Próximas Reuniões/Eventos" usa itemsStatus.todasFuturas (a partir de amanhã)
             renderTable(itemsStatus.todasFuturas, `${prefix}dataTableBodyFuturas`);
 
             // Renderiza a Tabela de Hoje.
             renderTable(itemsStatus.hoje, `${prefix}dataTableBodyHoje`);
+
+            // Renderiza a Tabela de Histórico para Reuniões E Eventos (nova implementação)
+            renderTable(itemsStatus.passados, `${prefix}dataTableBodyHistorico`);
 
 
             // 3. Inicializa o Filtro de Ano e Renderiza o Gráfico Mensal
@@ -1460,19 +1394,19 @@
         }
 
         // --- INICIALIZAÇÃO E REFRESH ---
-        
+
         // Função que será chamada a cada 3 segundos
         async function loadAllData() {
             // console.log('Iniciando atualização de dados...');
-            
+
             // Chama a função principal para as duas seções
             await fetchAndRenderDashboard(MEETINGS_GID, 'reunioes-', 'Reunião');
             await fetchAndRenderDashboard(EVENTS_GID, 'eventos-', 'Evento');
-            
+
             // Atualiza o indicador de última atualização
             const updateTime = new Date().toLocaleTimeString('pt-BR');
             const lastUpdateElement = document.getElementById('last-update');
-            if(lastUpdateElement) {
+            if (lastUpdateElement) {
                 lastUpdateElement.innerHTML = `Dados atualizados em: <strong>${updateTime}</strong>`;
             }
 
@@ -1486,7 +1420,7 @@
 
             // 2. Agendamento da atualização a cada 3 segundos (3000 ms)
             // O setInterval continuará chamando a função loadAllData indefinidamente.
-            setInterval(loadAllData, 3000); 
+            setInterval(loadAllData, 3000);
         });
 
         // -----------------------------------------------------
@@ -1494,12 +1428,12 @@
         // -----------------------------------------------------
 
         // Desabilita o menu de contexto (botão direito do mouse)
-        document.addEventListener('contextmenu', function(e) {
+        document.addEventListener('contextmenu', function (e) {
             e.preventDefault();
         });
 
         // Desabilita teclas comuns do DevTools e outras
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             // F12 check
             const isF12 = e.key === 'F12' || e.keyCode === 123;
             // Ctrl+Shift+I check (I = 73)
@@ -1517,7 +1451,7 @@
                 e.preventDefault();
             }
         });
-        
+
         // Novo: Detecção Ativa de DevTools (console.log)
         // Se o console estiver aberto, a função 'console.log' com um objeto demora muito mais a ser executada.
         const devtoolsCheck = () => {
@@ -1525,16 +1459,16 @@
             const loop = () => {
                 const start = performance.now();
                 // Tenta logar um objeto para forçar o DevTools a inspecionar, o que atrasa a execução se estiver aberto.
-                console.log('%c', 'display: none'); 
+                console.log('%c', 'display: none');
                 const end = performance.now();
-                
+
                 // Se a diferença de tempo for maior que o limite, o DevTools está aberto.
                 if (end - start > threshold) {
                     // Bloqueio: Redireciona para uma página vazia ou fecha a janela
                     document.body.innerHTML = '<h1>Acesso negado.</h1>';
                     // window.close(); // Pode não funcionar na maioria dos navegadores
                 }
-                
+
                 // Executa a cada X milissegundos
                 setTimeout(loop, 500);
             };
@@ -1544,12 +1478,6 @@
         if (window.console && window.console.log) {
             devtoolsCheck();
         }
-
-        // Inicializa o conteúdo com o blur removido (já que os elementos sidebar e content já tinham a classe 'content-blurred' no HTML para evitar flash)
-        // OBS: as variáveis 'sidebar' e 'content' não estão definidas, mas a linha abaixo era apenas um resquício e não deve causar problemas.
-        // if (typeof sidebar !== 'undefined') sidebar.classList.remove('content-blurred');
-        // if (typeof content !== 'undefined') content.classList.remove('content-blurred');
-
 
         // -----------------------------------------------------
         // --- FIM MEDIDAS DE "SEGURANÇA POR OBSCURIDADE" ---
